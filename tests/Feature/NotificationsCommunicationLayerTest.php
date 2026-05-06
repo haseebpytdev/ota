@@ -43,7 +43,7 @@ class NotificationsCommunicationLayerTest extends TestCase
         $this->seed(OtaFoundationSeeder::class);
         Mail::fake();
         $booking = Booking::factory()->create([
-            'agency_id' => Agency::query()->where('slug', 'aurora-sky-travel')->firstOrFail()->id,
+            'agency_id' => Agency::query()->where('slug', 'asif-travels')->firstOrFail()->id,
             'status' => BookingStatus::Draft,
             'customer_id' => null,
         ]);
@@ -109,7 +109,7 @@ class NotificationsCommunicationLayerTest extends TestCase
     {
         $this->seed(OtaFoundationSeeder::class);
         $this->withoutMiddleware(ValidateCsrfToken::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $booking = $this->supplierEligibleBooking($admin->current_agency_id);
 
         $this->actingAs($admin)->post(route('admin.bookings.supplier-booking', $booking))->assertRedirect();
@@ -170,7 +170,7 @@ class NotificationsCommunicationLayerTest extends TestCase
     {
         $this->seed(OtaFoundationSeeder::class);
         Mail::fake();
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $booking = $this->draftBookingWithContact();
         app(BookingService::class)->submitBookingRequest($booking);
 
@@ -190,7 +190,7 @@ class NotificationsCommunicationLayerTest extends TestCase
 
     protected function draftBookingWithContact(): Booking
     {
-        $agency = Agency::query()->where('slug', 'aurora-sky-travel')->firstOrFail();
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
         $customer = User::factory()->create(['current_agency_id' => $agency->id]);
         $booking = Booking::factory()->create([
             'agency_id' => $agency->id,
@@ -221,8 +221,8 @@ class NotificationsCommunicationLayerTest extends TestCase
      */
     protected function paymentReadyBooking(): array
     {
-        $agency = Agency::query()->where('slug', 'aurora-sky-travel')->firstOrFail();
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $booking = $this->draftBookingWithContact()->fresh();
         $booking->update([
             'agency_id' => $agency->id,
@@ -263,7 +263,7 @@ class NotificationsCommunicationLayerTest extends TestCase
      */
     protected function ticketingEligibleBooking(): array
     {
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $connection = SupplierConnection::query()
             ->where('agency_id', $admin->current_agency_id)
             ->where('provider', SupplierProvider::Mock)

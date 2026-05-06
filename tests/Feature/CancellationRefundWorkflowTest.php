@@ -224,7 +224,7 @@ class CancellationRefundWorkflowTest extends TestCase
     {
         $this->seed(OtaFoundationSeeder::class);
 
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $customer = User::query()->firstOrCreate(
             ['email' => 'customer@aurora-sky-travel.demo'],
             [
@@ -238,8 +238,8 @@ class CancellationRefundWorkflowTest extends TestCase
 
         return [
             $admin,
-            User::query()->where('email', 'staff@aurora-sky-travel.demo')->firstOrFail(),
-            User::query()->where('email', 'agent@aurora-sky-travel.demo')->firstOrFail(),
+            User::query()->where('email', 'staff@ota.demo')->firstOrFail(),
+            User::query()->where('email', 'agent@ota.demo')->firstOrFail(),
             $customer,
         ];
     }

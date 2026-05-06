@@ -5,9 +5,9 @@
 @section('page-header')
     <div class="row g-2 align-items-center">
         <div class="col">
-            <div class="page-pretitle">White-label</div>
+            <div class="page-pretitle">Branding</div>
             <h1 class="page-title">Branding settings</h1>
-            <div class="text-secondary mt-1">Client preview values from <code>config/demo-client.php</code> — all fields disabled for demo.</div>
+            <div class="text-secondary mt-1">Client preview values from <code>config/ota-client.php</code> — all fields are read-only here.</div>
         </div>
     </div>
 @endsection
@@ -66,7 +66,7 @@
                 </div>
             </div>
             <div class="mt-4">
-                <button type="button" class="btn btn-primary btn-demo-action" disabled>Save branding @include('components.demo-only-hint')</button>
+                <button type="button" class="btn btn-primary btn-planned-action" disabled>Save branding @include('components.planned-hint')</button>
             </div>
         </div>
     </div>

@@ -74,8 +74,8 @@ class AgentBookingCreationTest extends TestCase
     public function test_agent_cannot_view_another_agents_booking(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $agency = Agency::query()->where('slug', 'aurora-sky-travel')->firstOrFail();
-        $agentUser = User::query()->where('email', 'agent@aurora-sky-travel.demo')->firstOrFail();
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
+        $agentUser = User::query()->where('email', 'agent@ota.demo')->firstOrFail();
 
         $otherAgentUser = User::factory()->agent()->create([
             'current_agency_id' => $agency->id,
@@ -112,8 +112,8 @@ class AgentBookingCreationTest extends TestCase
     public function test_agency_admin_can_see_agent_created_booking_in_admin_bookings(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $agentUser = User::query()->where('email', 'agent@aurora-sky-travel.demo')->firstOrFail();
-        $adminUser = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $agentUser = User::query()->where('email', 'agent@ota.demo')->firstOrFail();
+        $adminUser = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
 
         $this->actingAs($agentUser)->post('/agent/bookings', $this->validPayload());
         $booking = Booking::query()->firstOrFail();
@@ -128,8 +128,8 @@ class AgentBookingCreationTest extends TestCase
     public function test_reports_count_agent_created_booking_as_agent_sales(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $agentUser = User::query()->where('email', 'agent@aurora-sky-travel.demo')->firstOrFail();
-        $adminUser = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $agentUser = User::query()->where('email', 'agent@ota.demo')->firstOrFail();
+        $adminUser = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
 
         $this->actingAs($agentUser)->post('/agent/bookings', $this->validPayload());
 
@@ -146,7 +146,7 @@ class AgentBookingCreationTest extends TestCase
     {
         $this->seed(OtaFoundationSeeder::class);
 
-        return User::query()->where('email', 'agent@aurora-sky-travel.demo')->firstOrFail();
+        return User::query()->where('email', 'agent@ota.demo')->firstOrFail();
     }
 
     /**

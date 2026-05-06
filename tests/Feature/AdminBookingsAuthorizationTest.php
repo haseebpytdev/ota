@@ -18,7 +18,7 @@ class AdminBookingsAuthorizationTest extends TestCase
     public function test_agency_admin_can_access_admin_bookings(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $this->actingAs($admin);
 
         $this->get('/admin/bookings')->assertOk();
@@ -27,7 +27,7 @@ class AdminBookingsAuthorizationTest extends TestCase
     public function test_staff_cannot_access_admin_bookings(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $staff = User::query()->where('email', 'staff@aurora-sky-travel.demo')->firstOrFail();
+        $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
         $this->actingAs($staff);
 
         $this->get('/admin/bookings')->assertForbidden();
@@ -36,7 +36,7 @@ class AdminBookingsAuthorizationTest extends TestCase
     public function test_agent_cannot_access_admin_bookings(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $agent = User::query()->where('email', 'agent@aurora-sky-travel.demo')->firstOrFail();
+        $agent = User::query()->where('email', 'agent@ota.demo')->firstOrFail();
         $this->actingAs($agent);
 
         $this->get('/admin/bookings')->assertForbidden();
@@ -45,7 +45,7 @@ class AdminBookingsAuthorizationTest extends TestCase
     public function test_agency_admin_can_access_admin_agents_section(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $this->actingAs($admin);
 
         $this->get('/admin/agents')->assertOk();
@@ -65,7 +65,7 @@ class AdminBookingsAuthorizationTest extends TestCase
     {
         $this->seed(OtaFoundationSeeder::class);
 
-        $aurora = Agency::query()->where('slug', 'aurora-sky-travel')->firstOrFail();
+        $aurora = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
         $other = Agency::query()->create([
             'name' => 'Other Travel',
             'slug' => 'other-travel-'.uniqid(),
@@ -85,7 +85,7 @@ class AdminBookingsAuthorizationTest extends TestCase
             'route' => 'KHI → DXB',
         ]);
 
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $this->actingAs($admin);
 
         $this->get('/admin/bookings')->assertOk()->assertSee('OTA-AURORA-ONLY', false)->assertDontSee('OTA-OTHER-ONLY', false);
@@ -95,7 +95,7 @@ class AdminBookingsAuthorizationTest extends TestCase
     {
         $this->seed(OtaFoundationSeeder::class);
 
-        $aurora = Agency::query()->where('slug', 'aurora-sky-travel')->firstOrFail();
+        $aurora = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
         $other = Agency::query()->create([
             'name' => 'Other Travel',
             'slug' => 'other-travel-'.uniqid(),
@@ -107,7 +107,7 @@ class AdminBookingsAuthorizationTest extends TestCase
             'status' => BookingStatus::Pending,
         ]);
 
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $this->actingAs($admin);
 
         $this->get('/admin/bookings?preview=OTA-FOREIGN')->assertForbidden();
@@ -118,7 +118,7 @@ class AdminBookingsAuthorizationTest extends TestCase
     {
         $this->seed(OtaFoundationSeeder::class);
 
-        $aurora = Agency::query()->where('slug', 'aurora-sky-travel')->firstOrFail();
+        $aurora = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
         $other = Agency::query()->create([
             'name' => 'Other Travel',
             'slug' => 'other-travel-'.uniqid(),

@@ -229,7 +229,7 @@
                     <p class="mb-1"><strong>PNR:</strong> {{ $booking->pnr ?? '—' }}</p>
                     <p class="mb-1 text-capitalize"><strong>Ticketing status:</strong> {{ str_replace('_', ' ', (string) ($booking->ticketing_status ?? 'not started')) }}</p>
                     <p class="mb-2"><strong>Ticketed at:</strong> {{ $booking->ticketed_at?->format('Y-m-d H:i') ?? '—' }}</p>
-                    <p class="text-muted small">Ticketing is a controlled action. This demo/mock workflow does not call Sabre/PIA ticketing APIs.</p>
+                    <p class="text-muted small">Ticketing is a controlled action. This workflow does not call Sabre/PIA ticketing APIs until integration is configured.</p>
                     @if ($providerSupported && ($ticketingEligible ?? false))
                         <form method="post" action="{{ $ticketRoute }}">
                             @csrf

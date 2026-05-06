@@ -117,6 +117,13 @@ class SupplierConnection extends Model
                 continue;
             }
 
+            if ($key === 'access_token' && $this->provider === SupplierProvider::Duffel) {
+                $prefix = str_starts_with($text, 'duffel_test_') ? 'duffel_test_' : substr($text, 0, min(6, strlen($text)));
+                $masked[$key] = $prefix.'••••••••••••';
+
+                continue;
+            }
+
             $tail = strlen($text) > 4 ? substr($text, -4) : $text;
             $masked[$key] = '••••'.$tail;
         }

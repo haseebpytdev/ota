@@ -36,12 +36,17 @@ class SupplierConnectionController extends Controller
             'sandbox' => (clone $kpiBase)->where('environment', SupplierEnvironment::Sandbox)->count(),
             'live' => (clone $kpiBase)->where('environment', SupplierEnvironment::Live)->count(),
         ];
+        $activeRealSupplierExists = (clone $kpiBase)
+            ->where('status', SupplierConnectionStatus::Active)
+            ->where('provider', '!=', SupplierProvider::Mock)
+            ->exists();
 
         return view('dashboard.admin.api-settings.index', [
             'connections' => $connections,
             'kpis' => $kpis,
             'hasRows' => $connections->count() > 0,
-            'demoSuppliers' => config('demo-suppliers.suppliers', []),
+            'fallbackSuppliers' => config('ota-suppliers.suppliers', []),
+            'activeRealSupplierExists' => $activeRealSupplierExists,
         ]);
     }
 
@@ -55,6 +60,7 @@ class SupplierConnectionController extends Controller
             'environments' => SupplierEnvironment::cases(),
             'statuses' => SupplierConnectionStatus::cases(),
             'maskedCredentials' => [],
+            'providerCredentialConfig' => config('supplier_credentials.providers', []),
             'action' => route('admin.api-settings.store'),
             'method' => 'POST',
         ]);
@@ -81,6 +87,7 @@ class SupplierConnectionController extends Controller
             'environments' => SupplierEnvironment::cases(),
             'statuses' => SupplierConnectionStatus::cases(),
             'maskedCredentials' => $supplierConnection->maskedCredentials(),
+            'providerCredentialConfig' => config('supplier_credentials.providers', []),
             'action' => route('admin.api-settings.update', $supplierConnection),
             'method' => 'PATCH',
         ]);
@@ -89,7 +96,7 @@ class SupplierConnectionController extends Controller
     public function update(UpdateSupplierConnectionRequest $request, SupplierConnection $supplierConnection): RedirectResponse
     {
         Gate::authorize('update', $supplierConnection);
-        $this->service->updateConnection($supplierConnection, $this->payload($request));
+        $this->service->updateConnection($supplierConnection, $this->payload($request, $supplierConnection));
 
         return redirect()->route('admin.api-settings')->with('status', 'supplier-connection-updated');
     }
@@ -135,13 +142,34 @@ class SupplierConnectionController extends Controller
     /**
      * @return array<string, mixed>
      */
-    protected function payload(Request $request): array
+    protected function payload(Request $request, ?SupplierConnection $existing = null): array
     {
+        $provider = $request->string('provider')->toString();
         $credentials = $request->input('credentials', []);
         if (! is_array($credentials)) {
             $credentials = [];
         }
-        $credentials = array_filter($credentials, fn ($value): bool => trim((string) $value) !== '');
+        $providerFields = (array) config('supplier_credentials.providers.'.$provider.'.fields', []);
+        $allowedKeys = array_keys($providerFields);
+        $normalizedCredentials = [];
+
+        $providerChanged = $existing !== null && $existing->provider->value !== $provider;
+        $baseCredentials = $providerChanged ? [] : (($existing?->credentials && is_array($existing->credentials)) ? $existing->credentials : []);
+
+        foreach ($allowedKeys as $key) {
+            $raw = $credentials[$key] ?? null;
+            $value = trim((string) $raw);
+            if ($value !== '') {
+                $normalizedCredentials[$key] = $value;
+            } elseif ($existing === null) {
+                $default = $providerFields[$key]['default'] ?? null;
+                if (is_string($default) && $default !== '') {
+                    $normalizedCredentials[$key] = $default;
+                }
+            }
+        }
+
+        $credentials = array_merge($baseCredentials, $normalizedCredentials);
 
         $settings = [];
         $settingsRaw = trim((string) $request->input('settings_json', ''));
@@ -160,7 +188,7 @@ class SupplierConnectionController extends Controller
         $status = $request->input('status', SupplierConnectionStatus::Inactive->value);
 
         return [
-            'provider' => $request->string('provider')->toString(),
+            'provider' => $provider,
             'name' => $request->string('name')->toString(),
             'display_name' => $request->string('name')->toString(),
             'environment' => $request->string('environment')->toString(),

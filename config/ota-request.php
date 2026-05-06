@@ -1,8 +1,5 @@
 <?php
 
-/**
- * Request Demo page — module options (display only).
- */
 return [
     'modules' => [
         'flights' => 'Flights & search',

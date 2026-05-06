@@ -25,7 +25,7 @@ class CommunicationSettingsPhase195BTest extends TestCase
     {
         $this->withoutMiddleware(ValidateCsrfToken::class);
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
 
         $this->actingAs($admin)->get(route('admin.settings.communications.index'))->assertOk();
         $this->actingAs($admin)->patch(route('admin.settings.communications.update'), [
@@ -50,8 +50,8 @@ class CommunicationSettingsPhase195BTest extends TestCase
     {
         $this->withoutMiddleware(ValidateCsrfToken::class);
         $this->seed(OtaFoundationSeeder::class);
-        $staff = User::query()->where('email', 'staff@aurora-sky-travel.demo')->firstOrFail();
-        $agent = User::query()->where('email', 'agent@aurora-sky-travel.demo')->firstOrFail();
+        $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
+        $agent = User::query()->where('email', 'agent@ota.demo')->firstOrFail();
         $customer = User::factory()->create(['account_type' => 'customer', 'current_agency_id' => $staff->current_agency_id]);
 
         $this->actingAs($staff)->patch(route('admin.settings.communications.update'), ['smtp_host' => 'x'])->assertForbidden();
@@ -69,7 +69,7 @@ class CommunicationSettingsPhase195BTest extends TestCase
     {
         $this->withoutMiddleware(ValidateCsrfToken::class);
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
 
         $this->actingAs($admin)->patch(route('admin.settings.communications.templates.update', ['event' => 'booking_confirmed', 'channel' => 'email']), [
             'subject' => 'Booking {{ booking_reference }} for {{ agency_name }}',
@@ -94,7 +94,7 @@ class CommunicationSettingsPhase195BTest extends TestCase
     {
         Mail::fake();
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $agency = Agency::query()->findOrFail($admin->current_agency_id);
         $booking = Booking::factory()->create(['agency_id' => $agency->id, 'booking_reference' => 'BK-LOG-1']);
         BookingContact::query()->create(['booking_id' => $booking->id, 'email' => 'guest@example.test', 'phone' => '+9200000']);
@@ -131,7 +131,7 @@ class CommunicationSettingsPhase195BTest extends TestCase
         Mail::fake();
         $this->withoutMiddleware(ValidateCsrfToken::class);
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $agency = Agency::query()->findOrFail($admin->current_agency_id);
 
         $this->actingAs($admin)->post(route('admin.settings.communications.test-email'), [

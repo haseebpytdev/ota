@@ -211,7 +211,7 @@ class AdminSectionController extends Controller
     {
         Gate::authorize('viewAny', SupplierConnection::class);
 
-        $config = config('demo-suppliers', []);
+        $config = config('ota-suppliers', []);
 
         return view('dashboard.admin.api-settings', [
             'suppliers' => $config['suppliers'] ?? [],
@@ -274,7 +274,7 @@ class AdminSectionController extends Controller
 
     public function goLiveChecklist(): View
     {
-        $items = collect(config('demo-go-live.items', []))
+        $items = collect(config('ota-go-live.items', []))
             ->map(function (array $item): array {
                 $note = (string) ($item['note'] ?? '');
                 $cleanNote = str_ireplace(

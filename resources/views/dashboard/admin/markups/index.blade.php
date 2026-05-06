@@ -106,7 +106,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="text-center text-secondary py-4">No markup rules yet. This screen will use demo pricing fallback until rules are added.</td>
+                            <td colspan="8" class="text-center text-secondary py-4">No markup rules yet. Default pricing will apply until rules are added.</td>
                         </tr>
                     @endforelse
                 </tbody>

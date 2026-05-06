@@ -1,10 +1,5 @@
 <?php
 
-/**
- * Go-live checklist for client demos (no DB).
- *
- * @var list<array{label: string, done: bool, note: string}>
- */
 return [
     'items' => [
         ['label' => 'Domain connected', 'done' => false, 'note' => 'DNS + SSL to app edge'],

@@ -1,10 +1,10 @@
-@php $c = $client ?? config('demo-client', []); @endphp
+@php $c = $client ?? config('ota-client', []); @endphp
 <section class="ota-section ota-home-whitelabel" id="whitelabel">
     <div class="ota-container">
         <div class="white-label-card">
             <div class="white-label-layout">
                 <div class="white-label-main">
-                    <p class="ota-section-kicker">White-label</p>
+                    <p class="ota-section-kicker">Branding</p>
                     <h2 class="white-label-title">Your brand. Your domain. Our engine.</h2>
                     <p class="white-label-lead">
                         This storefront preview uses <strong>{{ $c['agency_name'] ?? 'your agency' }}</strong> naming, colors, and support touchpoints while
@@ -12,13 +12,13 @@
                     </p>
                     <ul class="white-label-bullets">
                         <li><i class="fa fa-check" aria-hidden="true"></i> Primary color injection for CTAs &amp; accents</li>
-                        <li><i class="fa fa-check" aria-hidden="true"></i> Branded header, footer, and demo request flow</li>
+                        <li><i class="fa fa-check" aria-hidden="true"></i> Branded header, footer, and implementation request flow</li>
                         <li><i class="fa fa-check" aria-hidden="true"></i> Operator console separated at <code>/admin</code></li>
                     </ul>
                     <a href="{{ route('request-demo') }}" class="ota-btn ota-btn-primary white-label-cta">Schedule implementation call</a>
                 </div>
                 <aside class="white-label-panel" aria-label="Branding preview">
-                    <div class="white-label-panel-head">Mock branding panel</div>
+                    <div class="white-label-panel-head">Branding panel</div>
                     <dl class="white-label-dl">
                         <dt>Agency name</dt>
                         <dd>{{ $c['agency_name'] ?? '—' }}</dd>

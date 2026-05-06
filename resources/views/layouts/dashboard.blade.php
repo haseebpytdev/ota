@@ -1,6 +1,6 @@
 @php
     $tabler = asset('vendor/tabler');
-    $dashBrand = config('demo-brand', []);
+    $dashBrand = config('ota-brand', []);
 @endphp
 <!doctype html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">

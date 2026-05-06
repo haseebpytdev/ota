@@ -19,7 +19,7 @@ class BookingOperationsLayerTest extends TestCase
 
     protected function createAgencyBooking(User $admin, array $overrides = []): Booking
     {
-        $agency = Agency::query()->where('slug', 'aurora-sky-travel')->firstOrFail();
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
 
         return Booking::factory()->for($agency)->create(array_merge([
             'booking_reference' => 'OTA-TEST-'.uniqid(),
@@ -32,7 +32,7 @@ class BookingOperationsLayerTest extends TestCase
     public function test_agency_admin_can_filter_bookings_by_status(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $this->createAgencyBooking($admin, ['status' => BookingStatus::Pending, 'booking_reference' => 'OTA-F-PEND']);
         $this->createAgencyBooking($admin, ['status' => BookingStatus::Confirmed, 'booking_reference' => 'OTA-F-CONF']);
 
@@ -43,7 +43,7 @@ class BookingOperationsLayerTest extends TestCase
     public function test_agency_admin_can_search_bookings_by_reference(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $this->createAgencyBooking($admin, ['booking_reference' => 'OTA-SEARCH-XYZ']);
 
         $this->actingAs($admin);
@@ -53,7 +53,7 @@ class BookingOperationsLayerTest extends TestCase
     public function test_agency_admin_can_view_booking_detail_for_own_agency(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $booking = $this->createAgencyBooking($admin);
 
         $this->actingAs($admin);
@@ -73,7 +73,7 @@ class BookingOperationsLayerTest extends TestCase
             'status' => BookingStatus::Pending,
         ]);
 
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $this->actingAs($admin);
         $this->get(route('admin.bookings.show', $foreign))->assertForbidden();
     }
@@ -82,7 +82,7 @@ class BookingOperationsLayerTest extends TestCase
     {
         $this->seed(OtaFoundationSeeder::class);
         $this->withoutMiddleware(ValidateCsrfToken::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $booking = $this->createAgencyBooking($admin, ['status' => BookingStatus::Pending]);
 
         $this->actingAs($admin);
@@ -98,7 +98,7 @@ class BookingOperationsLayerTest extends TestCase
     {
         $this->seed(OtaFoundationSeeder::class);
         $this->withoutMiddleware(ValidateCsrfToken::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $booking = $this->createAgencyBooking($admin, ['status' => BookingStatus::Pending]);
 
         $this->actingAs($admin);
@@ -112,7 +112,7 @@ class BookingOperationsLayerTest extends TestCase
     {
         $this->seed(OtaFoundationSeeder::class);
         $this->withoutMiddleware(ValidateCsrfToken::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $booking = $this->createAgencyBooking($admin, ['status' => BookingStatus::Pending]);
 
         $this->actingAs($admin);
@@ -139,7 +139,7 @@ class BookingOperationsLayerTest extends TestCase
     {
         $this->seed(OtaFoundationSeeder::class);
         $this->withoutMiddleware(ValidateCsrfToken::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $booking = $this->createAgencyBooking($admin);
 
         $this->actingAs($admin);
@@ -157,7 +157,7 @@ class BookingOperationsLayerTest extends TestCase
     {
         $this->seed(OtaFoundationSeeder::class);
         $this->withoutMiddleware(ValidateCsrfToken::class);
-        $staff = User::query()->where('email', 'staff@aurora-sky-travel.demo')->firstOrFail();
+        $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
         $booking = $this->createAgencyBooking($staff);
 
         $this->actingAs($staff);
@@ -174,7 +174,7 @@ class BookingOperationsLayerTest extends TestCase
     public function test_agent_cannot_add_note_via_policy(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $agent = User::query()->where('email', 'agent@aurora-sky-travel.demo')->firstOrFail();
+        $agent = User::query()->where('email', 'agent@ota.demo')->firstOrFail();
         $booking = $this->createAgencyBooking($agent);
 
         $this->assertFalse(Gate::forUser($agent)->allows('addNote', $booking));
@@ -184,8 +184,8 @@ class BookingOperationsLayerTest extends TestCase
     {
         $this->seed(OtaFoundationSeeder::class);
         $this->withoutMiddleware(ValidateCsrfToken::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
-        $staff = User::query()->where('email', 'staff@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
         $booking = $this->createAgencyBooking($admin);
 
         $this->actingAs($admin);
@@ -201,7 +201,7 @@ class BookingOperationsLayerTest extends TestCase
     {
         $this->seed(OtaFoundationSeeder::class);
         $this->withoutMiddleware(ValidateCsrfToken::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $booking = $this->createAgencyBooking($admin);
 
         $otherAgency = Agency::query()->create([
@@ -225,7 +225,7 @@ class BookingOperationsLayerTest extends TestCase
     public function test_staff_can_access_staff_bookings_index(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $staff = User::query()->where('email', 'staff@aurora-sky-travel.demo')->firstOrFail();
+        $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
         $this->actingAs($staff);
         $this->get('/staff/bookings')->assertOk();
     }
@@ -240,7 +240,7 @@ class BookingOperationsLayerTest extends TestCase
         ]);
         $foreign = Booking::factory()->for($other)->create(['status' => BookingStatus::Pending]);
 
-        $staff = User::query()->where('email', 'staff@aurora-sky-travel.demo')->firstOrFail();
+        $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
         $this->actingAs($staff);
         $this->get(route('staff.bookings.show', $foreign))->assertForbidden();
     }

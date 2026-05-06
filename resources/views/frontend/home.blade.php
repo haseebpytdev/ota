@@ -4,8 +4,8 @@
 
 @section('content')
     @php
-        $b = config('demo-brand', []);
-        $client = $client ?? config('demo-client', []);
+        $b = config('ota-brand', []);
+        $client = $client ?? config('ota-client', []);
         $agencySettings = $agencySettings ?? null;
         $heroContent = $heroContent ?? [];
         $heroTitle = $heroTitle ?: ($b['homepage_headline'] ?? 'Book Flights With Confidence');
@@ -22,7 +22,7 @@
                     <p class="ota-hero-lead">{{ $heroSubtitle }}</p>
                     <div class="ota-hero-actions">
                         <a href="#ota-flight-search" class="ota-btn-white"><i class="fa fa-search"></i> Book Flights</a>
-                        <a href="{{ route('agent.register') }}" class="ota-btn-ghost" title="Agent Registration"><i class="fa fa-users"></i> Agent Registration</a>
+                        <a href="{{ route('agent.register') }}" class="ota-btn-ghost" title="Agent Network"><i class="fa fa-users"></i> Agent Network</a>
                     </div>
                     <p class="ota-hero-help-hint" id="support">
                         <i class="fa fa-arrow-circle-right" aria-hidden="true"></i>
@@ -34,9 +34,14 @@
                         <img src="{{ $safeHeroImage }}" alt="Hero image" style="width:100%;max-height:220px;object-fit:cover;border-radius:10px;margin-bottom:10px;">
                     @endif
                     @include('frontend.partials.ota-flight-widget', [
-                        'defaultDepart' => $defaultDepart,
-                        'defaultOrigin' => $defaultOrigin,
-                        'defaultDestination' => $defaultDestination,
+                        'variant' => 'hero',
+                        'show_intro' => true,
+                        'defaultDepart' => $defaultDepart ?? '',
+                        'defaultOrigin' => $defaultOrigin ?? '',
+                        'defaultDestination' => $defaultDestination ?? '',
+                        'defaultReturnDate' => $defaultReturnDate ?? '',
+                        'defaultTripType' => $defaultTripType ?? 'one_way',
+                        'minDate' => $minDate ?? now()->format('Y-m-d'),
                     ])
                 </div>
             </div>

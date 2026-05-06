@@ -3,9 +3,9 @@
     use Illuminate\Support\Facades\Log;
 
     // Always start from static/config-safe branding so errors still render if DB is down.
-    $brandName = (string) (config('app.name') ?: 'Hayat Travel Solutions');
+    $brandName = (string) (config('app.name') ?: 'Asif Travels');
     $tagline = 'Reliable travel support for agencies and customers.';
-    $supportEmail = (string) (config('mail.from.address') ?: 'support@hayattravelsolutions.com');
+    $supportEmail = (string) (config('mail.from.address') ?: 'support@haseebasif.com');
     $supportPhone = '+92 300 0000000';
     $primary = '#0c4a6e';
 
@@ -63,6 +63,7 @@
                 <p>@yield('message')</p>
                 <div class="actions">
                     <a href="{{ route('home') }}" class="btn btn-primary">Back to Home</a>
+                    <a href="{{ route('support') }}" class="btn btn-secondary">Contact Support</a>
                     @auth
                         <a href="{{ route('dashboard') }}" class="btn btn-secondary">Go to Dashboard</a>
                     @else

@@ -1,5 +1,5 @@
 @php
-    $b = config('demo-brand', []);
+    $b = config('ota-brand', []);
     $wa = preg_replace('/\D/', '', (string) ($b['support_whatsapp'] ?? '')) ?: '923001234567';
     $mail = $b['support_email'] ?? 'support@haseebasif.com';
 @endphp

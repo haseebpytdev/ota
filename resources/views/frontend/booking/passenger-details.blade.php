@@ -10,7 +10,7 @@
         $waUrl = $wa !== '' ? 'https://wa.me/'.$wa : '#';
     @endphp
     <div class="ota-book-wrap ota-checkout-page">
-        <div class="container">
+        <div class="ota-container ota-container-narrow">
             <div class="ota-checkout-page-head ota-checkout-page-head--flush">
                 <h1 class="ota-checkout-page-title">Checkout</h1>
                 <p class="ota-checkout-page-lead">Complete passenger and contact details. You can continue as a guest.</p>
@@ -35,7 +35,7 @@
                             <div class="min-w-0">
                                 <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
                                     <h2 class="ota-checkout-card__title mb-0">Guest checkout</h2>
-                                    <span class="ota-flow-badge">Secure booking</span>
+                                    <span class="ota-flow-badge">Guest flow</span>
                                 </div>
                                 <p class="ota-checkout-card__text mb-0">Complete this booking without creating an account. You can create a customer account anytime to manage future trips and documents.</p>
                             </div>
@@ -46,18 +46,29 @@
                         <div class="ota-checkout-account-card">
                             <h3 class="ota-checkout-account-card__title">Already have an account?</h3>
                             <p class="ota-checkout-account-card__text">Sign in to use saved travellers and corporate profiles.</p>
-                            <a href="{{ route('login') }}" class="btn btn-default btn-block">Sign in</a>
+                            <button type="button" class="ota-btn-account" disabled>Sign in</button>
                         </div>
                         <div class="ota-checkout-account-card">
                             <h3 class="ota-checkout-account-card__title">New customer?</h3>
                             <p class="ota-checkout-account-card__text">Create an account to track bookings and offers.</p>
-                            <a href="{{ route('register') }}" class="btn btn-default btn-block">Create account</a>
+                            <button type="button" class="ota-btn-account" disabled>Create account</button>
                         </div>
                     </div>
 
                     <form method="post" action="{{ route('booking.passengers') }}" class="ota-checkout-form">
                         @csrf
                         <input type="hidden" name="flight_id" value="{{ old('flight_id', $flightId) }}">
+                        <input type="hidden" name="offer_id" value="{{ old('offer_id', $draft['offer_id'] ?? $flightId) }}">
+                        <input type="hidden" name="search_id" value="{{ old('search_id', $draft['search_id'] ?? '') }}">
+                        <input type="hidden" name="from" value="{{ old('from', $draft['search_from'] ?? ($criteria['origin'] ?? '')) }}">
+                        <input type="hidden" name="to" value="{{ old('to', $draft['search_to'] ?? ($criteria['destination'] ?? '')) }}">
+                        <input type="hidden" name="depart" value="{{ old('depart', $draft['search_depart'] ?? ($criteria['depart_date'] ?? '')) }}">
+                        <input type="hidden" name="trip_type" value="{{ old('trip_type', $draft['trip_type'] ?? ($criteria['trip_type'] ?? 'one_way')) }}">
+                        <input type="hidden" name="return_date" value="{{ old('return_date', $draft['return_date'] ?? ($criteria['return_date'] ?? '')) }}">
+                        <input type="hidden" name="cabin" value="{{ old('cabin', $draft['cabin'] ?? ($criteria['cabin'] ?? 'economy')) }}">
+                        <input type="hidden" name="adults" value="{{ old('adults', $draft['adults'] ?? ($criteria['adults'] ?? 1)) }}">
+                        <input type="hidden" name="children" value="{{ old('children', $draft['children'] ?? ($criteria['children'] ?? 0)) }}">
+                        <input type="hidden" name="infants" value="{{ old('infants', $draft['infants'] ?? ($criteria['infants'] ?? 0)) }}">
 
                         <div class="ota-checkout-card">
                             <h2 class="ota-checkout-section-title">Passenger details</h2>
@@ -138,6 +149,9 @@
                         <div class="ota-checkout-card ota-checkout-card--accent ota-checkout-sticky-summary">
                             <h2 class="ota-checkout-aside-title">Selected flight</h2>
                             <p class="ota-checkout-summary-route"><strong>{{ $cr['origin'] }}</strong> → <strong>{{ $cr['destination'] }}</strong></p>
+                            @if(!empty($airlineLogo))
+                                <p style="margin:0 0 0.5rem;"><img src="{{ $airlineLogo }}" alt="{{ $o['airline_name'] ?? 'Airline' }} logo" style="height:24px;width:auto;"></p>
+                            @endif
                             <p class="ota-checkout-summary-airline">{{ $o['airline_name'] ?? '' }} · {{ $o['carrier_code'] ?? '' }}{{ $o['flight_number'] ?? '' }}</p>
                             <div class="ota-checkout-flight-compact__times mt-2 mb-2">
                                 <span>{{ \Illuminate\Support\Carbon::parse($o['depart_at'] ?? '')->format('H:i') }}</span>
@@ -158,7 +172,7 @@
                                 <span class="ota-checkout-fare-est__total">Rs {{ number_format((float) ($o['total'] ?? 0), 0) }}</span>
                                 <span class="ota-checkout-fare-est__sub">Estimated total in PKR.</span>
                             </div>
-                            <p class="ota-checkout-pay-note"><i class="fa fa-info-circle"></i> Payment is completed after booking confirmation based on your selected method.</p>
+                            <p class="ota-checkout-pay-note"><i class="fa fa-info-circle"></i> No payment is captured at this stage.</p>
                         </div>
                     @else
                         <div class="ota-checkout-card ota-checkout-card--muted">

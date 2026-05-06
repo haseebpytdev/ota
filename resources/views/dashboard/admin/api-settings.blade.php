@@ -8,7 +8,7 @@
             <div class="page-pretitle">Integrations</div>
             <h1 class="page-title">API Settings</h1>
             <div class="text-secondary mt-1">
-                Supplier matrix from <code>config/demo-suppliers.php</code>. No outbound calls and no credential storage in this demo.
+                Supplier matrix from <code>config/ota-suppliers.php</code>. Outbound calls and credential storage are disabled on this screen.
             </div>
         </div>
     </div>
@@ -24,7 +24,7 @@
         <div class="d-flex">
             <div><i class="ti ti-info-circle me-2"></i></div>
             <div>
-                <strong>Demo policy.</strong>
+                <strong>Policy.</strong>
                 {{ $integrationNotice }}
             </div>
         </div>
@@ -85,8 +85,8 @@
                             @endif
                         </div>
 
-                        <button type="button" class="btn btn-primary btn-sm btn-demo-action" disabled aria-disabled="true">
-                            Configure @include('components.demo-only-hint')
+                        <button type="button" class="btn btn-primary btn-sm btn-planned-action" disabled aria-disabled="true">
+                            Configure @include('components.planned-hint')
                         </button>
                         <span class="text-secondary small ms-2 d-block d-md-inline mt-1 mt-md-0">Vault not connected in this build.</span>
                     </div>

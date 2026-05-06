@@ -4,7 +4,13 @@
 
 @section('content')
     <h2>Sign in to Asif Travels</h2>
-    <p class="ota-auth-help">Customer, Agent, Staff, and Admin users can sign in here to access their dashboard.</p>
+    <p class="ota-auth-help">Sign in to access your account and continue your booking workflow.</p>
+
+    <div class="ota-auth-role-grid" aria-label="Account guidance">
+        <div class="ota-auth-role-chip"><strong>Customer</strong><span>View bookings and documents</span></div>
+        <div class="ota-auth-role-chip"><strong>Agent</strong><span>Manage requests and commissions</span></div>
+        <div class="ota-auth-role-chip"><strong>Operator</strong><span>Admin and staff access</span></div>
+    </div>
 
     @if (session('status'))
         <div class="ota-auth-alert">{{ session('status') }}</div>
@@ -13,8 +19,9 @@
     <form method="POST" action="{{ route('login') }}">
         @csrf
         <div class="ota-auth-group">
-            <label class="ota-auth-label" for="email">Email</label>
-            <input id="email" class="ota-auth-input" type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="username">
+            <label class="ota-auth-label" for="login">Username or Email</label>
+            <input id="login" class="ota-auth-input" type="text" name="login" value="{{ old('login', old('email')) }}" required autofocus autocomplete="username">
+            @error('login')<div class="ota-auth-error">{{ $message }}</div>@enderror
             @error('email')<div class="ota-auth-error">{{ $message }}</div>@enderror
         </div>
 

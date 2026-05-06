@@ -35,7 +35,7 @@ class ControlledTicketingWorkflowTest extends TestCase
     {
         [$booking] = $this->eligibleBookingForMock();
         $this->withoutMiddleware(ValidateCsrfToken::class);
-        $staff = User::query()->where('email', 'staff@aurora-sky-travel.demo')->firstOrFail();
+        $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
 
         $this->actingAs($staff)->post(route('staff.bookings.issue-ticket', $booking))->assertRedirect();
 
@@ -45,7 +45,7 @@ class ControlledTicketingWorkflowTest extends TestCase
     public function test_agent_cannot_issue_ticket(): void
     {
         [$booking] = $this->eligibleBookingForMock();
-        $agent = User::query()->where('email', 'agent@aurora-sky-travel.demo')->firstOrFail();
+        $agent = User::query()->where('email', 'agent@ota.demo')->firstOrFail();
 
         $this->actingAs($agent)->post(route('admin.bookings.issue-ticket', $booking))->assertForbidden();
     }
@@ -212,7 +212,7 @@ class ControlledTicketingWorkflowTest extends TestCase
     protected function eligibleBookingForProvider(SupplierProvider $provider, array $bookingOverrides = []): array
     {
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $connection = SupplierConnection::query()
             ->where('agency_id', $admin->current_agency_id)
             ->where('provider', $provider)

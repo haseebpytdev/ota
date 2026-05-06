@@ -140,12 +140,12 @@ class Phase20BProductUiWiringTest extends TestCase
     public function test_key_pages_avoid_demo_fake_placeholder_sample_data_wording(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $customer = User::factory()->create(['account_type' => AccountType::Customer, 'current_agency_id' => $admin->current_agency_id]);
 
         $publicPaths = [
             '/',
-            '/flights/results?from=LHE&to=DXB&depart='.now()->addDays(7)->toDateString(),
+            '/flights/results?from=LHE&to=DXB&depart='.now()->addDays(7)->toDateString().'&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0',
             '/booking/passengers',
             '/booking/review',
             '/booking/confirmation',
@@ -177,7 +177,7 @@ class Phase20BProductUiWiringTest extends TestCase
         ] as $path) {
             $response = str_starts_with($path, '/admin') || str_starts_with($path, '/staff')
                 ? $this->actingAs($admin)->get($path)
-                : (str_starts_with($path, '/customer') ? $this->actingAs($customer)->get($path) : $this->actingAs(User::query()->where('email', 'agent@aurora-sky-travel.demo')->firstOrFail())->get($path));
+                : (str_starts_with($path, '/customer') ? $this->actingAs($customer)->get($path) : $this->actingAs(User::query()->where('email', 'agent@ota.demo')->firstOrFail())->get($path));
             if ($response->status() === 200) {
                 $content = strtolower($response->getContent());
                 foreach (['demo only', 'fake', 'sample data'] as $word) {
@@ -197,8 +197,8 @@ class Phase20BProductUiWiringTest extends TestCase
     public function test_go_live_checklist_remains_admin_only_and_production_safe(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
-        $staff = User::query()->where('email', 'staff@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
 
         $this->actingAs($admin)->get(route('admin.go-live-checklist'))
             ->assertOk()

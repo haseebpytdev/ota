@@ -41,7 +41,7 @@ class OperationalSafetyHardeningTest extends TestCase
     public function test_mutating_routes_require_auth_and_public_routes_stay_public(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $booking = Booking::factory()->create(['agency_id' => $admin->current_agency_id]);
         $payment = BookingPayment::query()->create([
             'agency_id' => $admin->current_agency_id,
@@ -72,8 +72,8 @@ class OperationalSafetyHardeningTest extends TestCase
     public function test_system_health_and_deployment_checklist_are_admin_only_and_safe(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
-        $staff = User::query()->where('email', 'staff@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
 
         $this->actingAs($admin)->get(route('admin.system-health'))
             ->assertOk()
@@ -89,7 +89,7 @@ class OperationalSafetyHardeningTest extends TestCase
     {
         $this->withoutMiddleware(ValidateCsrfToken::class);
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
 
         $booking = Booking::factory()->create([
             'agency_id' => $admin->current_agency_id,
@@ -172,7 +172,7 @@ class OperationalSafetyHardeningTest extends TestCase
         $this->assertSame('ok', $redacted['normal']);
 
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $booking = Booking::factory()->create([
             'agency_id' => $admin->current_agency_id,
             'status' => BookingStatus::Confirmed,
@@ -188,7 +188,7 @@ class OperationalSafetyHardeningTest extends TestCase
     public function test_invalid_transition_integrity_rejections_for_cancellation_and_refund_states(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $booking = Booking::factory()->create(['agency_id' => $admin->current_agency_id, 'status' => BookingStatus::Cancelled]);
         $request = BookingCancellationRequest::query()->create([
             'agency_id' => $booking->agency_id,
@@ -206,7 +206,7 @@ class OperationalSafetyHardeningTest extends TestCase
     public function test_invalid_refund_transition_rejected_to_approved_is_blocked(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $booking = Booking::factory()->create(['agency_id' => $admin->current_agency_id, 'status' => BookingStatus::Cancelled]);
         $refund = BookingRefund::query()->create([
             'agency_id' => $booking->agency_id,

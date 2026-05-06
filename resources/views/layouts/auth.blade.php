@@ -1,6 +1,6 @@
 @php
-    $brand = config('demo-brand', []);
-    $client = config('demo-client', []);
+    $brand = config('ota-brand', []);
+    $client = config('ota-client', []);
     $safeBranding = \App\Support\Branding\SafeBrandingResolver::resolveForPublic(app(\App\Services\Agencies\AgencyBrandingService::class));
     $settings = $safeBranding['settings'] ?? null;
     $brandName = $settings?->display_name ?: ($client['agency_name'] ?? ($brand['product_name'] ?? 'Asif Travels'));
@@ -22,20 +22,22 @@
 </head>
 <body class="ota-auth">
     <main class="ota-auth-shell">
-        <section class="ota-auth-card">
+        <section class="ota-auth-card ota-container-form">
             <aside class="ota-auth-brand">
                 <a href="{{ route('home') }}" class="ota-auth-link" style="color:#fff;text-decoration:none;font-weight:800;">{{ $brandName }}</a>
                 <h1>Welcome to {{ $brandName }}</h1>
                 <p>{{ $tagline }}</p>
+                <ul class="ota-auth-brand-list">
+                    <li>Search and request flights</li>
+                    <li>Track booking status</li>
+                    <li>Download receipts and travel documents</li>
+                </ul>
             </aside>
             <div class="ota-auth-form-wrap">
                 @yield('content')
                 <p class="ota-auth-support">
                     Need help? Contact <a class="ota-auth-link" href="mailto:{{ $supportEmail }}">{{ $supportEmail }}</a> or return to
                     <a class="ota-auth-link" href="{{ route('home') }}">homepage</a>.
-                </p>
-                <p class="ota-auth-support" style="margin-top:8px;">
-                    Support line: <a class="ota-auth-link" href="tel:{{ preg_replace('/\s+/', '', $supportPhone) }}">{{ $supportPhone }}</a>
                 </p>
             </div>
         </section>

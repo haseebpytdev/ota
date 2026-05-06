@@ -10,7 +10,7 @@ class DemoFlightOffers
      */
     public static function withDemoMeta(array $offers): array
     {
-        $meta = config('demo-flights.offers', []);
+        $meta = config('ota-flights.offers', []);
 
         return array_map(function (array $offer) use ($meta): array {
             $id = $offer['id'] ?? '';

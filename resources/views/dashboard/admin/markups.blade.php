@@ -8,7 +8,7 @@
             <div class="page-pretitle">Commercial rules</div>
             <h1 class="page-title">Markups &amp; commissions</h1>
             <div class="text-secondary mt-1">
-                Read-only demo from <code>config/demo-markups.php</code>. No database and no save actions.
+                Reference view from <code>config/ota-markups.php</code>. Database save actions are not enabled on this screen.
             </div>
         </div>
     </div>
@@ -203,7 +203,7 @@
     </div>
 
     <div class="text-center text-secondary small">
-        <button type="button" class="btn btn-primary btn-demo-action" disabled>Save changes @include('components.demo-only-hint')</button>
-        <span class="d-block mt-2">Forms and persistence are not enabled in this demo.</span>
+        <button type="button" class="btn btn-primary btn-planned-action" disabled>Save changes @include('components.planned-hint')</button>
+        <span class="d-block mt-2">Forms and persistence are not enabled on this screen.</span>
     </div>
 @endsection

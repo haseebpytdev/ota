@@ -94,7 +94,7 @@ class Phase20AProductionSafetyTest extends TestCase
     public function test_homepage_uses_db_settings_when_present_and_escapes_unsafe_html(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $agency = Agency::query()->where('slug', 'aurora-sky-travel')->firstOrFail();
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
         $agency->agencySetting()->updateOrCreate(
             ['agency_id' => $agency->id],
             ['display_name' => 'Aurora DB Brand', 'tagline' => '<script>alert(1)</script>']
@@ -109,9 +109,9 @@ class Phase20AProductionSafetyTest extends TestCase
     public function test_product_ui_routes_are_db_wired_and_professional_copy(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
-        $agent = User::query()->where('email', 'agent@aurora-sky-travel.demo')->firstOrFail();
-        $staff = User::query()->where('email', 'staff@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $agent = User::query()->where('email', 'agent@ota.demo')->firstOrFail();
+        $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
 
         Booking::factory()->create([
             'agency_id' => $admin->current_agency_id,
@@ -137,8 +137,8 @@ class Phase20AProductionSafetyTest extends TestCase
     public function test_customer_and_agent_portals_use_authenticated_db_backed_access(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $agency = Agency::query()->where('slug', 'aurora-sky-travel')->firstOrFail();
-        $agent = User::query()->where('email', 'agent@aurora-sky-travel.demo')->firstOrFail();
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
+        $agent = User::query()->where('email', 'agent@ota.demo')->firstOrFail();
 
         $customer = User::factory()->create([
             'account_type' => AccountType::Customer,

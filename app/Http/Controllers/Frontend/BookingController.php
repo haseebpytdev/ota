@@ -7,8 +7,11 @@ use App\Models\Agency;
 use App\Models\Booking;
 use App\Services\Booking\BookingDraftService;
 use App\Services\Booking\BookingService;
+use App\Services\FlightSearch\FlightDeparturePolicy;
+use App\Services\FlightSearch\FlightSearchResultStore;
 use App\Services\FlightSearch\FlightSearchService;
 use App\Services\Suppliers\OfferValidationService;
+use App\Services\TravelData\AirlineBrandingService;
 use App\Support\PublicBooking;
 use App\Support\Security\SensitiveDataRedactor;
 use Illuminate\Http\RedirectResponse;
@@ -22,15 +25,20 @@ class BookingController extends Controller
     public function __construct(
         protected BookingDraftService $bookingDraft,
         protected FlightSearchService $flightSearch,
+        protected FlightSearchResultStore $searchStore,
         protected BookingService $bookingService,
         protected OfferValidationService $offerValidationService,
+        protected AirlineBrandingService $airlineBranding,
+        protected FlightDeparturePolicy $departurePolicy,
     ) {}
 
     public function passengers(Request $request): View|RedirectResponse
     {
         if ($request->isMethod('post')) {
             $validated = $request->validate([
-                'flight_id' => ['required', 'string', 'max:64'],
+                'flight_id' => ['nullable', 'string', 'max:128'],
+                'offer_id' => ['nullable', 'string', 'max:128'],
+                'search_id' => ['nullable', 'string', 'max:128'],
                 'title' => ['nullable', 'string', 'max:16'],
                 'first_name' => ['required', 'string', 'max:120'],
                 'last_name' => ['required', 'string', 'max:120'],
@@ -41,18 +49,39 @@ class BookingController extends Controller
                 'country' => ['nullable', 'string', 'max:120'],
             ]);
 
+            $selectedOfferId = trim((string) ($validated['offer_id'] ?? $validated['flight_id'] ?? ''));
+            if ($selectedOfferId === '') {
+                return redirect()->route('flights.search')->withErrors(['flight_id' => __('Selected flight is required.')]);
+            }
+
             $merge = [
-                'flight_id' => $validated['flight_id'],
+                'flight_id' => $selectedOfferId,
+                'offer_id' => $selectedOfferId,
+                'search_id' => trim((string) ($validated['search_id'] ?? '')),
                 'search_from' => $request->string('from')->toString(),
                 'search_to' => $request->string('to')->toString(),
                 'search_depart' => $request->string('depart')->toString(),
+                'trip_type' => $request->string('trip_type', 'one_way')->toString(),
+                'return_date' => $request->string('return_date')->toString(),
+                'cabin' => $request->string('cabin', 'economy')->toString(),
+                'adults' => max(1, (int) $request->input('adults', 1)),
+                'children' => max(0, (int) $request->input('children', 0)),
+                'infants' => max(0, (int) $request->input('infants', 0)),
             ];
             $this->bookingDraft->merge($merge);
 
             $criteria = [
-                'origin' => $merge['search_from'] !== '' ? $merge['search_from'] : 'LHE',
-                'destination' => $merge['search_to'] !== '' ? $merge['search_to'] : 'DXB',
-                'depart_date' => $merge['search_depart'] !== '' ? $merge['search_depart'] : now()->addDays(14)->format('Y-m-d'),
+                'origin' => $merge['search_from'] ?? '',
+                'destination' => $merge['search_to'] ?? '',
+                'depart_date' => $merge['search_depart'] ?? '',
+                'trip_type' => $merge['trip_type'] ?? 'one_way',
+                'return_date' => $merge['return_date'] ?? null,
+                'cabin' => $merge['cabin'] ?? 'economy',
+                'adults' => (int) ($merge['adults'] ?? 1),
+                'children' => (int) ($merge['children'] ?? 0),
+                'infants' => (int) ($merge['infants'] ?? 0),
+                'segments' => $merge['segments'] ?? null,
+                'source_channel' => 'public_guest',
             ];
 
             $agency = Agency::query()->where('slug', config('ota.default_agency_slug'))->first();
@@ -60,11 +89,42 @@ class BookingController extends Controller
                 return redirect()->route('flights.search')->withErrors(['flight_id' => __('Booking is temporarily unavailable.')]);
             }
 
-            $offers = $this->flightSearch->search($criteria, $agency, 'public_guest');
-            $offer = collect($offers)->firstWhere('id', $validated['flight_id']);
+            $offer = null;
+            $searchId = $merge['search_id'];
+            if ($searchId !== '') {
+                $offer = $this->searchStore->findOffer($searchId, $selectedOfferId);
+                if ($offer === null) {
+                    return redirect()->route('flights.search')
+                        ->withErrors(['flight_id' => __('This fare search has expired. Please search again.')]);
+                }
+            }
+            if ($offer === null) {
+                $offers = $this->flightSearch->search($criteria, $agency, 'public_guest');
+                $offer = collect($offers)->firstWhere('id', $selectedOfferId);
+            }
 
             if ($offer === null) {
                 return redirect()->route('flights.search')->withErrors(['flight_id' => __('Selected flight is no longer available.')]);
+            }
+
+            $leadCriteria = $criteria;
+            if (($merge['search_id'] ?? '') !== '') {
+                $payload = $this->searchStore->get((string) $merge['search_id']);
+                if (is_array($payload['criteria'] ?? null)) {
+                    $leadCriteria = $payload['criteria'];
+                }
+            }
+            if (! $this->departurePolicy->offerMeetsLeadTimeForBooking($offer, $leadCriteria)) {
+                return redirect()->route('flights.search')
+                    ->withErrors(['flight_id' => __(FlightDeparturePolicy::SAME_DAY_LEAD_MESSAGE)]);
+            }
+
+            if (($offer['conversion_status'] ?? 'same_currency') === 'conversion_missing') {
+                return redirect()->route('flights.results', [
+                    'from' => $criteria['origin'],
+                    'to' => $criteria['destination'],
+                    'depart' => $criteria['depart_date'],
+                ])->withErrors(['flight_id' => __('This fare requires currency review before booking.')]);
             }
 
             $validation = $this->offerValidationService->validateSelectedOffer($agency, $offer, $criteria + [
@@ -72,7 +132,9 @@ class BookingController extends Controller
             ]);
             if ($validation->status === 'price_changed') {
                 return redirect()->route('booking.passengers', [
-                    'flight_id' => $validated['flight_id'],
+                    'flight_id' => $selectedOfferId,
+                    'offer_id' => $selectedOfferId,
+                    'search_id' => $searchId,
                     'from' => $criteria['origin'],
                     'to' => $criteria['destination'],
                     'depart' => $criteria['depart_date'],
@@ -165,31 +227,62 @@ class BookingController extends Controller
         }
 
         $flightId = $request->string('flight_id')->toString();
-        if ($flightId !== '') {
+        $offerId = $request->string('offer_id')->toString();
+        $searchId = $request->string('search_id')->toString();
+        if ($flightId !== '' || $offerId !== '' || $searchId !== '') {
             $this->bookingDraft->merge([
-                'flight_id' => $flightId,
+                'flight_id' => $flightId !== '' ? $flightId : $offerId,
+                'offer_id' => $offerId !== '' ? $offerId : $flightId,
+                'search_id' => $searchId,
                 'search_from' => $request->string('from')->toString(),
                 'search_to' => $request->string('to')->toString(),
                 'search_depart' => $request->string('depart')->toString(),
+                'trip_type' => $request->string('trip_type', 'one_way')->toString(),
+                'return_date' => $request->string('return_date')->toString(),
+                'cabin' => $request->string('cabin', 'economy')->toString(),
+                'adults' => max(1, (int) $request->input('adults', 1)),
+                'children' => max(0, (int) $request->input('children', 0)),
+                'infants' => max(0, (int) $request->input('infants', 0)),
             ]);
         }
 
         $draft = $this->bookingDraft->current();
-        $effectiveFlightId = $flightId !== '' ? $flightId : ($draft['flight_id'] ?? '');
+        $effectiveFlightId = $flightId !== '' ? $flightId : (($draft['offer_id'] ?? '') !== '' ? $draft['offer_id'] : ($draft['flight_id'] ?? ''));
 
         $criteria = [
-            'origin' => $draft['search_from'] ?? 'LHE',
-            'destination' => $draft['search_to'] ?? 'DXB',
-            'depart_date' => $draft['search_depart'] ?? now()->addDays(14)->format('Y-m-d'),
+            'origin' => $draft['search_from'] ?? '',
+            'destination' => $draft['search_to'] ?? '',
+            'depart_date' => $draft['search_depart'] ?? '',
+            'trip_type' => $draft['trip_type'] ?? 'one_way',
+            'return_date' => $draft['return_date'] ?? null,
+            'cabin' => $draft['cabin'] ?? 'economy',
+            'adults' => (int) ($draft['adults'] ?? 1),
+            'children' => (int) ($draft['children'] ?? 0),
+            'infants' => (int) ($draft['infants'] ?? 0),
         ];
 
         $offer = null;
         $agency = Agency::query()->where('slug', config('ota.default_agency_slug'))->first();
         if ($effectiveFlightId !== '') {
-            $offers = $agency !== null
-                ? $this->flightSearch->search($criteria, $agency, 'public_guest')
-                : [];
-            $offer = collect($offers)->firstWhere('id', $effectiveFlightId);
+            $offer = null;
+            if (is_string($draft['search_id'] ?? null) && ($draft['search_id'] ?? '') !== '') {
+                $offer = $this->searchStore->findOffer((string) $draft['search_id'], $effectiveFlightId);
+            }
+            if ($offer === null) {
+                $offers = $agency !== null && $criteria['origin'] !== '' && $criteria['destination'] !== '' && $criteria['depart_date'] !== ''
+                    ? $this->flightSearch->search($criteria, $agency, 'public_guest')
+                    : [];
+                $offer = collect($offers)->firstWhere('id', $effectiveFlightId);
+            }
+        }
+
+        if ($offer !== null && is_string($draft['search_id'] ?? null) && ($draft['search_id'] ?? '') !== '') {
+            $payload = $this->searchStore->get((string) $draft['search_id']);
+            $leadCriteria = is_array($payload['criteria'] ?? null) ? $payload['criteria'] : $criteria;
+            if (! $this->departurePolicy->offerMeetsLeadTimeForBooking($offer, $leadCriteria)) {
+                return redirect()->route('flights.search')
+                    ->withErrors(['flight_id' => __(FlightDeparturePolicy::SAME_DAY_LEAD_MESSAGE)]);
+            }
         }
 
         return view('frontend.booking.passenger-details', [
@@ -197,9 +290,12 @@ class BookingController extends Controller
             'flightId' => $effectiveFlightId,
             'offer' => $offer,
             'criteria' => $criteria,
-            'client' => config('demo-client', []),
+            'client' => config('ota-client', []),
             'validationResult' => session('validation_result'),
             'validationAlert' => session('validation_alert'),
+            'airlineLogo' => $offer !== null
+                ? $this->airlineBranding->getLogoForCode((string) ($offer['airline_code'] ?? ($offer['carrier_code'] ?? '')))
+                : null,
         ]);
     }
 
@@ -279,6 +375,7 @@ class BookingController extends Controller
             'offer' => $offer,
             'criteria' => $criteria,
             'booking' => $booking,
+            'airlineLogo' => $this->airlineBranding->getLogoForCode((string) ($offer['airline_code'] ?? ($offer['carrier_code'] ?? ''))),
         ]);
     }
 
@@ -329,6 +426,9 @@ class BookingController extends Controller
             'offer' => $offer,
             'criteria' => $criteria,
             'booking' => $booking,
+            'airlineLogo' => $offer !== null
+                ? $this->airlineBranding->getLogoForCode((string) ($offer['airline_code'] ?? ($offer['carrier_code'] ?? '')))
+                : null,
         ]);
     }
 

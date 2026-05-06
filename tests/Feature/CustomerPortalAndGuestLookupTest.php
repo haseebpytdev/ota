@@ -160,7 +160,7 @@ class CustomerPortalAndGuestLookupTest extends TestCase
     public function test_customer_routes_remain_authenticated_and_customer_only(): void
     {
         [, $booking] = $this->customerBooking();
-        $staff = User::query()->where('email', 'staff@aurora-sky-travel.demo')->firstOrFail();
+        $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
 
         $this->get(route('customer.bookings.index'))->assertRedirect();
         $this->actingAs($staff)->get(route('customer.bookings.show', $booking))->assertForbidden();
@@ -173,7 +173,7 @@ class CustomerPortalAndGuestLookupTest extends TestCase
     protected function customerBooking(array $overrides = []): array
     {
         $this->seed(OtaFoundationSeeder::class);
-        $agency = Agency::query()->where('slug', 'aurora-sky-travel')->firstOrFail();
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
         $customer = User::factory()->create([
             'account_type' => AccountType::Customer,
             'current_agency_id' => $agency->id,

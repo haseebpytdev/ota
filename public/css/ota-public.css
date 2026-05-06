@@ -201,6 +201,14 @@ body.ota-public header.top-area {
   margin-left: auto;
   flex-wrap: wrap;
 }
+.ota-nav-links-desktop {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.1rem;
+}
+.ota-nav-mobile-groups {
+  display: none;
+}
 .ota-nav-links a {
   color: var(--ota-muted) !important;
   text-decoration: none !important;
@@ -316,6 +324,38 @@ body.ota-public header.top-area {
     border-top: 1px solid var(--ota-border);
     flex-direction: column;
     align-items: stretch;
+    background: #fff;
+    border-radius: 0 0 12px 12px;
+  }
+  .ota-nav-links-desktop,
+  .ota-nav-dropdown {
+    display: none;
+  }
+  .ota-nav-mobile-groups {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+  .ota-mobile-group {
+    border: 1px solid var(--ota-border);
+    border-radius: 10px;
+    padding: 0.65rem;
+    background: #f8fafc;
+  }
+  .ota-mobile-group-title {
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ota-muted);
+    margin-bottom: 0.25rem;
+  }
+  .ota-mobile-group a {
+    display: block;
+    padding: 0.5rem 0.55rem;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: 8px;
   }
   .ota-nav-dropdown-menu {
     position: static;
@@ -339,6 +379,14 @@ body.ota-public header.top-area {
   }
   .ota-nav-cta-floating {
     display: none !important;
+  }
+  .ota-nav-cta-inmenu {
+    margin-top: 0.15rem;
+  }
+}
+@media (max-width: 640px) {
+  .ota-slim-topbar-inner span:nth-child(n + 3) {
+    display: none;
   }
 }
 @media (min-width: 1200px) and (max-width: 1365px) {
@@ -499,6 +547,9 @@ body.ota-public header.top-area {
   margin-left: auto;
   margin-right: auto;
 }
+.ota-search-card--standalone {
+  max-width: 100%;
+}
 @media (min-width: 992px) {
   .ota-search-card {
     max-width: 100%;
@@ -594,7 +645,86 @@ body.ota-public header.top-area {
   align-items: end;
   margin-bottom: 1rem;
 }
+.ota-from-wrap,
+.ota-to-wrap {
+  position: relative;
+}
+.ota-airport-suggest {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 50;
+  display: none;
+  background: #fff;
+  border: 1px solid var(--ota-border);
+  border-radius: 12px;
+  box-shadow: var(--ota-shadow);
+  max-height: 320px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.ota-airport-item {
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: #fff;
+  padding: 0.65rem 0.75rem;
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  grid-template-areas:
+    "code main"
+    "code sub";
+  gap: 0.15rem 0.55rem;
+  border-bottom: 1px solid #f1f5f9;
+  min-height: 58px;
+}
+.ota-airport-item:last-child {
+  border-bottom: 0;
+}
+.ota-airport-item:hover,
+.ota-airport-item.is-active {
+  background: #eff6ff;
+}
+.ota-airport-item-code {
+  grid-area: code;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--ota-blue-dark);
+  align-self: center;
+}
+.ota-airport-item-main {
+  grid-area: main;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--ota-navy);
+  line-height: 1.25;
+}
+.ota-airport-item-sub {
+  grid-area: sub;
+  font-size: 0.82rem;
+  color: var(--ota-muted);
+  line-height: 1.25;
+}
 @media (max-width: 575px) {
+  .ota-airport-suggest {
+    max-height: 280px;
+  }
+  .ota-airport-item {
+    min-height: 60px;
+    padding: 0.7rem 0.75rem;
+    grid-template-columns: 58px 1fr;
+  }
+  .ota-airport-item-code {
+    font-size: 0.78rem;
+  }
+  .ota-airport-item-main {
+    font-size: 0.86rem;
+  }
+  .ota-airport-item-sub {
+    font-size: 0.8rem;
+  }
   .ota-from-to-row {
     grid-template-columns: 1fr;
   }
@@ -678,6 +808,12 @@ body.ota-public header.top-area {
   padding-left: var(--ota-gutter-x);
   padding-right: var(--ota-gutter-x);
   box-sizing: border-box;
+}
+.ota-container-narrow {
+  max-width: 860px;
+}
+.ota-container-form {
+  max-width: 980px;
 }
 .ota-container .ota-features-grid,
 .ota-container .ota-routes-grid {
@@ -829,6 +965,18 @@ body.ota-public header.top-area {
 .ota-home-fares {
   background: #fff;
   border-top: 1px solid var(--ota-border);
+}
+.ota-home-fares-note {
+  text-align: center;
+  padding: 1.5rem;
+  background: #f8fafc;
+  border-radius: var(--ota-radius);
+  border: 1px solid var(--ota-border);
+}
+.ota-home-fares-note-text {
+  margin: 0;
+  color: var(--ota-muted);
+  font-size: 0.95rem;
 }
 .fare-grid {
   display: grid;
@@ -1413,11 +1561,13 @@ body.ota-public footer.footer-copyright hr {
 @media (max-width: 767px) {
   .ota-footer-grid {
     grid-template-columns: 1fr 1fr;
+    gap: 1.75rem 1.2rem;
   }
 }
 @media (max-width: 479px) {
   .ota-footer-grid {
     grid-template-columns: 1fr;
+    gap: 1.75rem;
   }
 }
 .ota-footer h4 {
@@ -1472,6 +1622,9 @@ body.ota-public .ota-flight-detail-wrap {
 }
 body.ota-public .ota-flight-search-wrap {
   padding-bottom: 3rem;
+}
+body.ota-public .ota-flight-search-wrap .ota-section-head {
+  margin-bottom: 1.15rem;
 }
 body.ota-public .ota-flight-detail-wrap {
   padding-bottom: 4rem;
@@ -2375,6 +2528,16 @@ body.ota-public .ota-confirm-btn-admin {
   color: var(--ota-navy);
   letter-spacing: 0.04em;
 }
+.ota-airline-logo--img {
+  background: #fff;
+  padding: 4px;
+}
+.ota-airline-logo--img img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+}
 .ota-airline-name {
   font-size: 0.8rem;
   font-weight: 700;
@@ -2453,12 +2616,25 @@ body.ota-public .ota-confirm-btn-admin {
   background: var(--ota-blue-dark);
   border-color: #1e40af;
 }
+.ota-filter-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
 @media (max-width: 767px) {
   .ota-results-filters {
     margin-bottom: 1.25rem;
   }
   .ota-filter-card {
-    position: static;
+    position: fixed;
+    display: none;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: 15%;
+    z-index: 1200;
+    overflow: auto;
+    border-radius: 14px 14px 0 0;
   }
   .ota-result-pro-card .text-right {
     text-align: left !important;

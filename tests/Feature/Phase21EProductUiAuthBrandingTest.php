@@ -39,7 +39,7 @@ class Phase21EProductUiAuthBrandingTest extends TestCase
         $this->get('/register')
             ->assertOk()
             ->assertSee('Create your Asif Travels account', false)
-            ->assertSee('Book flights, track requests, submit payments, and download your travel documents.', false);
+            ->assertSee('Book flights, track your booking requests, submit payment proof, and access travel documents from one place.', false);
 
         $this->get('/agent/register')
             ->assertOk()
@@ -123,7 +123,7 @@ class Phase21EProductUiAuthBrandingTest extends TestCase
             'status' => 'pending',
         ]);
 
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $this->actingAs($admin)->patch(route('admin.agent-applications.approve', $application), [
             'internal_note' => 'Looks good',
         ])->assertRedirect();
@@ -139,30 +139,38 @@ class Phase21EProductUiAuthBrandingTest extends TestCase
         $this->assertInstanceOf(Agent::class, Agent::query()->where('user_id', $agentUser->id)->first());
     }
 
-    public function test_signup_dropdown_renders_customer_and_agent_options(): void
+    public function test_navbar_information_architecture_matches_final_public_navigation(): void
     {
         $this->get('/')
             ->assertOk()
+            ->assertSee('Home', false)
+            ->assertSee('Flights', false)
+            ->assertSee('Agent Network', false)
+            ->assertSee('Support', false)
+            ->assertSee('Contact', false)
             ->assertSee('Login', false)
+            ->assertSee('Customer Login', false)
+            ->assertSee('Agent Login', false)
+            ->assertSee('Operator Login', false)
             ->assertSee('Signup', false)
             ->assertSee('Customer Signup', false)
             ->assertSee('Agent Registration', false)
-            ->assertSee('Book and manage your trips', false)
-            ->assertSee('Apply for partner access', false)
-            ->assertSee('Customer Login', false)
-            ->assertSee('Agent Login', false)
-            ->assertSee('Operator Login', false);
+            ->assertSee('Book Flights', false);
     }
 
-    public function test_support_and_contact_pages_render_successfully(): void
+    public function test_support_and_contact_pages_render_different_titles_and_content(): void
     {
         $this->get('/support')
             ->assertOk()
-            ->assertSee('Customer Support', false);
+            ->assertSee('Customer Support', false)
+            ->assertSee('Lookup Booking', false)
+            ->assertDontSee('Contact Asif Travels', false);
 
         $this->get('/contact')
             ->assertOk()
-            ->assertSee('Customer Support', false);
+            ->assertSee('Contact Asif Travels', false)
+            ->assertSee('Email Us', false)
+            ->assertDontSee('Customer Support', false);
     }
 
     public function test_agent_application_form_contains_review_notice(): void
@@ -185,7 +193,12 @@ class Phase21EProductUiAuthBrandingTest extends TestCase
     {
         $this->get('/login')
             ->assertOk()
-            ->assertSee('Customer, Agent, Staff, and Admin users can sign in here to access their dashboard.', false)
+            ->assertSee('Customer', false)
+            ->assertSee('View bookings and documents', false)
+            ->assertSee('Agent', false)
+            ->assertSee('Manage requests and commissions', false)
+            ->assertSee('Operator', false)
+            ->assertSee('Admin and staff access', false)
             ->assertSee('Customer Signup', false)
             ->assertSee('Agent Registration', false);
     }
@@ -202,13 +215,21 @@ class Phase21EProductUiAuthBrandingTest extends TestCase
         }
     }
 
-    public function test_public_pages_do_not_contain_demo_or_whitelabel_wording(): void
+    public function test_public_pages_do_not_contain_banned_or_technical_phrases(): void
     {
-        foreach (['/', '/flights/search', '/support', '/contact', '/agent/register'] as $path) {
+        foreach (['/', '/flights/search', '/support', '/contact', '/agent/register', '/flights/results?from=LHE&to=DXB&depart=2026-06-20&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0'] as $path) {
             $response = $this->get($path)->assertOk();
             $response->assertDontSee('demo', false);
             $response->assertDontSee('white-label', false);
-            $response->assertDontSee('mock', false);
+            $response->assertDontSee('sample data', false);
+            $response->assertDontSee('provider readiness', false);
+            $response->assertDontSee('provider capabilities', false);
+            $response->assertDontSee('inventory preview', false);
+            $response->assertDontSee('API-ready supplier', false);
+        }
+
+        foreach (['/', '/flights/search', '/support', '/contact', '/agent/register'] as $path) {
+            $this->get($path)->assertOk()->assertDontSee('mock', false);
         }
     }
 
@@ -219,5 +240,47 @@ class Phase21EProductUiAuthBrandingTest extends TestCase
             ->assertSee('Book your next flight', false)
             ->assertSee('ota-flight-search', false)
             ->assertSee('Search routes, compare fares, and continue to booking review with Asif Travels support.', false);
+    }
+
+    public function test_flight_results_and_review_use_consistent_cta_labels(): void
+    {
+        $this->get('/flights/results?from=LHE&to=DXB&depart=2026-06-20&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0')
+            ->assertOk()
+            ->assertSee('Book Now', false);
+
+        $this->seed(OtaFoundationSeeder::class);
+        $this->withoutMiddleware([ValidateCsrfToken::class]);
+        $this->post('/booking/passengers', [
+            'flight_id' => 'mock-1',
+            'from' => 'LHE',
+            'to' => 'DXB',
+            'depart' => now()->addWeek()->format('Y-m-d'),
+            'first_name' => 'Test',
+            'last_name' => 'User',
+            'email' => 'cta.user@example.com',
+            'phone' => '+923001112200',
+        ])->assertRedirect(route('booking.review'));
+
+        $this->get('/booking/review')
+            ->assertOk()
+            ->assertSee('Submit booking request', false);
+    }
+
+    public function test_customer_register_page_support_text_is_not_duplicated(): void
+    {
+        $response = $this->get('/register')->assertOk();
+        $html = $response->getContent();
+        $this->assertSame(1, substr_count($html, 'Need help?'));
+    }
+
+    public function test_agent_landing_page_shows_card_timeline_workflow(): void
+    {
+        $this->get('/agent/register')
+            ->assertOk()
+            ->assertSee('How it works', false)
+            ->assertSee('1. Submit application', false)
+            ->assertSee('2. Admin review', false)
+            ->assertSee('3. Receive activation link', false)
+            ->assertSee('4. Start booking', false);
     }
 }

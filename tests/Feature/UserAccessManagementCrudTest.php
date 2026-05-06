@@ -18,7 +18,7 @@ class UserAccessManagementCrudTest extends TestCase
     public function test_agency_admin_can_access_user_management(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
 
         $this->actingAs($admin)->get(route('admin.users.index'))->assertOk();
     }
@@ -26,7 +26,7 @@ class UserAccessManagementCrudTest extends TestCase
     public function test_staff_cannot_access_user_management(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $staff = User::query()->where('email', 'staff@aurora-sky-travel.demo')->firstOrFail();
+        $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
 
         $this->actingAs($staff)->get(route('admin.users.index'))->assertForbidden();
     }
@@ -34,7 +34,7 @@ class UserAccessManagementCrudTest extends TestCase
     public function test_agent_cannot_access_user_management(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $agent = User::query()->where('email', 'agent@aurora-sky-travel.demo')->firstOrFail();
+        $agent = User::query()->where('email', 'agent@ota.demo')->firstOrFail();
 
         $this->actingAs($agent)->get(route('admin.users.index'))->assertForbidden();
     }
@@ -134,7 +134,7 @@ class UserAccessManagementCrudTest extends TestCase
     public function test_suspended_user_cannot_access_operator_routes_if_middleware_implemented(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $staff = User::query()->where('email', 'staff@aurora-sky-travel.demo')->firstOrFail();
+        $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
         $staff->update(['status' => UserAccountStatus::Suspended]);
 
         $this->actingAs($staff)->get(route('staff.dashboard'))->assertForbidden();
@@ -208,10 +208,10 @@ class UserAccessManagementCrudTest extends TestCase
      */
     protected function agencyAdmin(): array
     {
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->first();
+        $admin = User::query()->where('email', 'admin@ota.demo')->first();
         if ($admin === null) {
             $this->seed(OtaFoundationSeeder::class);
-            $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+            $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         }
 
         return [$admin];

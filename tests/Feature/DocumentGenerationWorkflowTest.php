@@ -33,7 +33,7 @@ class DocumentGenerationWorkflowTest extends TestCase
     {
         $this->withoutMiddleware(ValidateCsrfToken::class);
         [$booking] = $this->bookingForAgencyAdmin();
-        $staff = User::query()->where('email', 'staff@aurora-sky-travel.demo')->firstOrFail();
+        $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
 
         $this->actingAs($staff)->post(route('staff.bookings.documents.confirmation', $booking))->assertRedirect();
         $this->assertDatabaseHas('booking_documents', ['booking_id' => $booking->id, 'document_type' => 'booking_confirmation', 'status' => 'generated']);
@@ -42,7 +42,7 @@ class DocumentGenerationWorkflowTest extends TestCase
     public function test_agent_cannot_generate_admin_document(): void
     {
         [$booking] = $this->bookingForAgencyAdmin();
-        $agent = User::query()->where('email', 'agent@aurora-sky-travel.demo')->firstOrFail();
+        $agent = User::query()->where('email', 'agent@ota.demo')->firstOrFail();
 
         $this->actingAs($agent)->post(route('admin.bookings.documents.confirmation', $booking))->assertForbidden();
     }
@@ -163,7 +163,7 @@ class DocumentGenerationWorkflowTest extends TestCase
     protected function bookingForAgencyAdmin(array $overrides = []): array
     {
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $booking = Booking::factory()->create(array_merge([
             'agency_id' => $admin->current_agency_id,
             'status' => BookingStatus::Paid,

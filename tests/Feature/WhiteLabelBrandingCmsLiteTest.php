@@ -23,7 +23,7 @@ class WhiteLabelBrandingCmsLiteTest extends TestCase
     {
         $this->withoutMiddleware(ValidateCsrfToken::class);
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
 
         $this->actingAs($admin)->get(route('admin.settings.branding.edit'))->assertOk();
         $this->actingAs($admin)->patch(route('admin.settings.branding.update'), [
@@ -43,8 +43,8 @@ class WhiteLabelBrandingCmsLiteTest extends TestCase
     {
         $this->withoutMiddleware(ValidateCsrfToken::class);
         $this->seed(OtaFoundationSeeder::class);
-        $staff = User::query()->where('email', 'staff@aurora-sky-travel.demo')->firstOrFail();
-        $agent = User::query()->where('email', 'agent@aurora-sky-travel.demo')->firstOrFail();
+        $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
+        $agent = User::query()->where('email', 'agent@ota.demo')->firstOrFail();
         $customer = User::factory()->create(['account_type' => 'customer', 'current_agency_id' => $staff->current_agency_id]);
 
         $this->actingAs($staff)->patch(route('admin.settings.branding.update'), ['display_name' => 'x'])->assertForbidden();
@@ -57,7 +57,7 @@ class WhiteLabelBrandingCmsLiteTest extends TestCase
         Storage::fake('public');
         $this->withoutMiddleware(ValidateCsrfToken::class);
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
 
         $this->actingAs($admin)->post(route('admin.settings.media.store'), [
             'file' => UploadedFile::fake()->image('logo.png', 200, 200),
@@ -80,7 +80,7 @@ class WhiteLabelBrandingCmsLiteTest extends TestCase
         Storage::fake('public');
         $this->withoutMiddleware(ValidateCsrfToken::class);
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
 
         $this->actingAs($admin)->post(route('admin.settings.media.store'), [
             'file' => UploadedFile::fake()->create('not-image.pdf', 50, 'application/pdf'),
@@ -90,7 +90,7 @@ class WhiteLabelBrandingCmsLiteTest extends TestCase
     public function test_homepage_uses_db_branding_and_falls_back_to_demo_when_missing(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $agency = Agency::query()->where('slug', 'aurora-sky-travel')->firstOrFail();
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
         AgencySetting::query()->create([
             'agency_id' => $agency->id,
             'display_name' => 'DB Brand Name',
@@ -111,7 +111,7 @@ class WhiteLabelBrandingCmsLiteTest extends TestCase
     public function test_unsafe_html_in_settings_is_escaped_on_homepage(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $agency = Agency::query()->where('slug', 'aurora-sky-travel')->firstOrFail();
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
         AgencyHomepageSection::query()->updateOrCreate(
             ['agency_id' => $agency->id, 'section_key' => 'hero'],
             ['title' => '<script>alert(1)</script>', 'subtitle' => '<b>Unsafe</b>']
@@ -125,7 +125,7 @@ class WhiteLabelBrandingCmsLiteTest extends TestCase
     public function test_pdf_template_uses_agency_settings_and_sidebar_has_settings_links(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         AgencySetting::query()->updateOrCreate(['agency_id' => $admin->current_agency_id], [
             'display_name' => 'Aurora Display',
             'support_email' => 'brand@aurora.test',

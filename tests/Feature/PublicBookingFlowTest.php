@@ -141,7 +141,7 @@ class PublicBookingFlowTest extends TestCase
     public function test_agency_admin_sees_database_booking_on_admin_bookings(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $agency = Agency::query()->where('slug', 'aurora-sky-travel')->firstOrFail();
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
 
         $this->withoutMiddleware(ValidateCsrfToken::class);
         $depart = now()->addWeek()->format('Y-m-d');
@@ -157,7 +157,7 @@ class PublicBookingFlowTest extends TestCase
         ]);
         $this->post('/booking/review', ['booking_method' => 'pay_later']);
 
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $this->actingAs($admin);
 
         $this->get('/admin/bookings')->assertOk()->assertSee('Admin Visible', false);

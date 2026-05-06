@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DashboardRedirectController;
 use App\Http\Controllers\Frontend\AgentRegistrationController;
+use App\Http\Controllers\Frontend\AirportSearchController;
 use App\Http\Controllers\Frontend\BookingController;
 use App\Http\Controllers\Frontend\FlightController;
 use App\Http\Controllers\Frontend\GuestBookingCancellationController;
@@ -15,8 +16,8 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::get('/request-demo', RequestDemoController::class)->name('request-demo');
-Route::get('/support', [SupportController::class, 'show'])->name('support');
-Route::get('/contact', [SupportController::class, 'show'])->name('contact');
+Route::get('/support', [SupportController::class, 'support'])->name('support');
+Route::get('/contact', [SupportController::class, 'contact'])->name('contact');
 Route::get('/agent/register', [AgentRegistrationController::class, 'landing'])->name('agent.register');
 Route::get('/agent/register/apply', [AgentRegistrationController::class, 'create'])->name('agent.register.form');
 Route::post('/agent/register', [AgentRegistrationController::class, 'store'])->middleware('throttle:6,1')->name('agent.register.store');
@@ -24,7 +25,9 @@ Route::get('/agent/register/submitted', [AgentRegistrationController::class, 'su
 
 Route::get('/flights/search', [FlightController::class, 'search'])->name('flights.search');
 Route::get('/flights/results', [FlightController::class, 'results'])->name('flights.results');
+Route::get('/flights/results/data', [FlightController::class, 'resultsData'])->name('flights.results.data');
 Route::get('/flights/details/{id}', [FlightController::class, 'details'])->name('flights.details');
+Route::get('/airports/search', AirportSearchController::class)->middleware('throttle:60,1')->name('airports.search');
 
 Route::match(['get', 'post'], '/booking/passengers', [BookingController::class, 'passengers'])->middleware('throttle:public-booking-submit')->name('booking.passengers');
 Route::match(['get', 'post'], '/booking/review', [BookingController::class, 'review'])->middleware('throttle:public-booking-submit')->name('booking.review');

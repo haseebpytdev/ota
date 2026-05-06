@@ -23,7 +23,7 @@ class MarkupPricingEngineTest extends TestCase
     public function test_agency_admin_can_view_markup_rules(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
 
         $this->actingAs($admin)->get('/admin/markups')->assertOk();
     }
@@ -31,7 +31,7 @@ class MarkupPricingEngineTest extends TestCase
     public function test_agency_admin_can_create_markup_rule(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
 
         $this->actingAs($admin)->post('/admin/markups', [
             'name' => 'Test global markup',
@@ -51,7 +51,7 @@ class MarkupPricingEngineTest extends TestCase
     public function test_agency_admin_can_edit_own_markup_rule(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $rule = MarkupRule::query()->firstOrFail();
 
         $this->actingAs($admin)->patch('/admin/markups/'.$rule->id, [
@@ -70,7 +70,7 @@ class MarkupPricingEngineTest extends TestCase
     public function test_agency_admin_cannot_edit_another_agency_markup_rule(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $otherAgency = Agency::factory()->create();
         $rule = MarkupRule::factory()->create(['agency_id' => $otherAgency->id]);
 
@@ -89,7 +89,7 @@ class MarkupPricingEngineTest extends TestCase
     public function test_staff_cannot_access_admin_markups(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $staff = User::query()->where('email', 'staff@aurora-sky-travel.demo')->firstOrFail();
+        $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
 
         $this->actingAs($staff)->get('/admin/markups')->assertForbidden();
     }
@@ -97,7 +97,7 @@ class MarkupPricingEngineTest extends TestCase
     public function test_inactive_markup_rule_is_not_applied(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $agency = Agency::query()->where('slug', 'aurora-sky-travel')->firstOrFail();
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
         $service = app(PricingRuleService::class);
 
         MarkupRule::factory()->create([
@@ -151,7 +151,7 @@ class MarkupPricingEngineTest extends TestCase
     public function test_route_markup_applies_only_to_matching_route(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $agency = Agency::query()->where('slug', 'aurora-sky-travel')->firstOrFail();
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
         $service = app(PricingRuleService::class);
 
         $matched = $service->calculateMarkup($agency, ['base_fare' => 120000, 'carrier_code' => 'PK'], [
@@ -173,7 +173,7 @@ class MarkupPricingEngineTest extends TestCase
     public function test_airline_markup_applies_only_matching_airline(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $agency = Agency::query()->where('slug', 'aurora-sky-travel')->firstOrFail();
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
         $service = app(PricingRuleService::class);
 
         $pk = $service->calculateMarkup($agency, ['base_fare' => 120000, 'carrier_code' => 'PK'], [
@@ -195,7 +195,7 @@ class MarkupPricingEngineTest extends TestCase
     public function test_agent_source_channel_rule_applies_to_agent_booking(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $agentUser = User::query()->where('email', 'agent@aurora-sky-travel.demo')->firstOrFail();
+        $agentUser = User::query()->where('email', 'agent@ota.demo')->firstOrFail();
 
         $this->actingAs($agentUser)->post('/agent/bookings', [
             'from' => 'LHE',
@@ -270,7 +270,7 @@ class MarkupPricingEngineTest extends TestCase
     public function test_agent_booking_uses_db_markup_pricing(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $agentUser = User::query()->where('email', 'agent@aurora-sky-travel.demo')->firstOrFail();
+        $agentUser = User::query()->where('email', 'agent@ota.demo')->firstOrFail();
         $agent = Agent::query()->where('user_id', $agentUser->id)->firstOrFail();
 
         $this->actingAs($agentUser)->post('/agent/bookings', [

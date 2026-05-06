@@ -81,7 +81,7 @@ class SupplierConnectionCrudTest extends TestCase
     public function test_staff_cannot_access_admin_api_settings(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $staff = User::query()->where('email', 'staff@aurora-sky-travel.demo')->firstOrFail();
+        $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
         $this->actingAs($staff)->get('/admin/api-settings')->assertForbidden();
     }
 
@@ -133,6 +133,190 @@ class SupplierConnectionCrudTest extends TestCase
         $connection->refresh();
         $this->assertSame('old-id', $connection->credentials['client_id']);
         $this->assertSame('old-secret', $connection->credentials['client_secret']);
+    }
+
+    public function test_duffel_form_shows_access_token_and_api_version(): void
+    {
+        $admin = $this->seededAdmin();
+        $duffel = SupplierConnection::factory()->create([
+            'agency_id' => $admin->current_agency_id,
+            'provider' => SupplierProvider::Duffel,
+            'name' => 'Duffel Form',
+        ]);
+
+        $this->actingAs($admin)
+            ->get('/admin/api-settings/'.$duffel->id.'/edit')
+            ->assertOk()
+            ->assertSee('Access Token', false)
+            ->assertSee('API Version', false);
+    }
+
+    public function test_duffel_form_hides_generic_non_duffel_credentials(): void
+    {
+        $admin = $this->seededAdmin();
+        $duffel = SupplierConnection::factory()->create([
+            'agency_id' => $admin->current_agency_id,
+            'provider' => SupplierProvider::Duffel,
+            'name' => 'Duffel Form Hidden Fields',
+        ]);
+
+        $this->actingAs($admin)
+            ->get('/admin/api-settings/'.$duffel->id.'/edit')
+            ->assertOk()
+            ->assertDontSee('Client ID</label>', false)
+            ->assertDontSee('Client Secret</label>', false)
+            ->assertDontSee('Username</label>', false)
+            ->assertDontSee('Password</label>', false);
+    }
+
+    public function test_duffel_store_requires_access_token(): void
+    {
+        $admin = $this->seededAdmin();
+
+        $this->actingAs($admin)->post('/admin/api-settings', [
+            'provider' => SupplierProvider::Duffel->value,
+            'name' => 'Duffel Missing Token',
+            'environment' => SupplierEnvironment::Sandbox->value,
+            'status' => SupplierConnectionStatus::Inactive->value,
+            'credentials' => ['api_version' => 'v2'],
+            'settings_json' => '{}',
+        ])->assertSessionHasErrors('credentials.access_token');
+    }
+
+    public function test_duffel_store_does_not_require_client_id_and_client_secret(): void
+    {
+        $admin = $this->seededAdmin();
+
+        $this->actingAs($admin)->post('/admin/api-settings', [
+            'provider' => SupplierProvider::Duffel->value,
+            'name' => 'Duffel Token Only',
+            'environment' => SupplierEnvironment::Sandbox->value,
+            'status' => SupplierConnectionStatus::Inactive->value,
+            'credentials' => ['access_token' => 'duffel_test_token_only'],
+            'settings_json' => '{}',
+        ])->assertRedirect('/admin/api-settings');
+
+        $this->assertDatabaseHas('supplier_connections', [
+            'name' => 'Duffel Token Only',
+            'provider' => SupplierProvider::Duffel->value,
+        ]);
+    }
+
+    public function test_duffel_update_preserves_existing_token_when_blank(): void
+    {
+        $admin = $this->seededAdmin();
+        $connection = SupplierConnection::factory()->create([
+            'agency_id' => $admin->current_agency_id,
+            'provider' => SupplierProvider::Duffel,
+            'name' => 'Duffel Preserve Token',
+            'credentials' => ['access_token' => 'duffel_test_old_token', 'api_version' => 'v1'],
+        ]);
+
+        $this->actingAs($admin)->patch('/admin/api-settings/'.$connection->id, [
+            'provider' => SupplierProvider::Duffel->value,
+            'name' => $connection->name,
+            'environment' => SupplierEnvironment::Sandbox->value,
+            'status' => SupplierConnectionStatus::Inactive->value,
+            'base_url' => '',
+            'credentials' => [
+                'access_token' => '',
+                'api_version' => 'v2',
+            ],
+            'settings_json' => '{}',
+        ])->assertRedirect('/admin/api-settings');
+
+        $connection->refresh();
+        $this->assertSame('duffel_test_old_token', $connection->credentials['access_token']);
+        $this->assertSame('v2', $connection->credentials['api_version']);
+    }
+
+    public function test_duffel_update_replaces_token_when_new_token_submitted(): void
+    {
+        $admin = $this->seededAdmin();
+        $connection = SupplierConnection::factory()->create([
+            'agency_id' => $admin->current_agency_id,
+            'provider' => SupplierProvider::Duffel,
+            'name' => 'Duffel Replace Token',
+            'credentials' => ['access_token' => 'duffel_test_old_token'],
+        ]);
+
+        $this->actingAs($admin)->patch('/admin/api-settings/'.$connection->id, [
+            'provider' => SupplierProvider::Duffel->value,
+            'name' => $connection->name,
+            'environment' => SupplierEnvironment::Sandbox->value,
+            'status' => SupplierConnectionStatus::Inactive->value,
+            'base_url' => '',
+            'credentials' => [
+                'access_token' => 'duffel_test_new_token',
+                'api_version' => 'v2',
+            ],
+            'settings_json' => '{}',
+        ])->assertRedirect('/admin/api-settings');
+
+        $connection->refresh();
+        $this->assertSame('duffel_test_new_token', $connection->credentials['access_token']);
+    }
+
+    public function test_duffel_readiness_passes_with_access_token_only(): void
+    {
+        $admin = $this->seededAdmin();
+        $duffel = SupplierConnection::factory()->create([
+            'agency_id' => $admin->current_agency_id,
+            'provider' => SupplierProvider::Duffel,
+            'environment' => SupplierEnvironment::Sandbox,
+            'status' => SupplierConnectionStatus::Active,
+            'is_active' => true,
+            'credentials' => ['access_token' => 'duffel_test_readiness_token'],
+        ]);
+
+        $this->actingAs($admin)->patch('/admin/api-settings/'.$duffel->id.'/test')->assertRedirect();
+
+        $duffel->refresh();
+        $this->assertSame('ready_for_review', $duffel->last_test_status);
+        $this->assertNull($duffel->last_error);
+    }
+
+    public function test_saved_duffel_token_is_never_rendered_in_edit_page(): void
+    {
+        $admin = $this->seededAdmin();
+        $connection = SupplierConnection::factory()->create([
+            'agency_id' => $admin->current_agency_id,
+            'provider' => SupplierProvider::Duffel,
+            'name' => 'Duffel Edit Masking',
+            'credentials' => ['access_token' => 'duffel_test_super_secret_token'],
+        ]);
+
+        $this->actingAs($admin)
+            ->get('/admin/api-settings/'.$connection->id.'/edit')
+            ->assertOk()
+            ->assertDontSee('duffel_test_super_secret_token', false)
+            ->assertSee('Stored token:', false)
+            ->assertSee('duffel_test_', false);
+    }
+
+    public function test_sabre_non_duffel_provider_fields_still_work(): void
+    {
+        $admin = $this->seededAdmin();
+        $sabre = SupplierConnection::query()
+            ->where('agency_id', $admin->current_agency_id)
+            ->where('provider', SupplierProvider::Sabre)
+            ->firstOrFail();
+
+        $this->actingAs($admin)->patch('/admin/api-settings/'.$sabre->id, [
+            'provider' => SupplierProvider::Sabre->value,
+            'name' => 'Sabre Creds',
+            'environment' => SupplierEnvironment::Sandbox->value,
+            'status' => SupplierConnectionStatus::Inactive->value,
+            'credentials' => [
+                'client_id' => 'sabre-client',
+                'client_secret' => 'sabre-secret',
+            ],
+            'settings_json' => '{}',
+        ])->assertRedirect('/admin/api-settings');
+
+        $sabre->refresh();
+        $this->assertSame('sabre-client', $sabre->credentials['client_id']);
+        $this->assertSame('sabre-secret', $sabre->credentials['client_secret']);
     }
 
     public function test_mock_supplier_readiness_check_marks_success(): void
@@ -209,6 +393,6 @@ class SupplierConnectionCrudTest extends TestCase
     {
         $this->seed(OtaFoundationSeeder::class);
 
-        return User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        return User::query()->where('email', 'admin@ota.demo')->firstOrFail();
     }
 }

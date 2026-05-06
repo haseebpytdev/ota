@@ -107,7 +107,7 @@ class LiveDeploymentPreparationTest extends TestCase
     public function test_security_headers_apply_on_public_and_admin_routes(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
 
         $public = $this->get(route('home'))->assertOk();
         $adminResponse = $this->actingAs($admin)->get(route('admin.dashboard'))->assertOk();
@@ -123,8 +123,8 @@ class LiveDeploymentPreparationTest extends TestCase
     public function test_deployment_checklist_and_system_health_stay_admin_only(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
-        $staff = User::query()->where('email', 'staff@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
 
         $this->actingAs($admin)->get(route('admin.deployment-checklist'))->assertOk();
         $this->actingAs($admin)->get(route('admin.system-health'))->assertOk();
@@ -160,7 +160,7 @@ class LiveDeploymentPreparationTest extends TestCase
     protected function customerBooking(): array
     {
         $this->seed(OtaFoundationSeeder::class);
-        $agency = Agency::query()->where('slug', 'aurora-sky-travel')->firstOrFail();
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
         $customer = User::factory()->create([
             'account_type' => AccountType::Customer,
             'current_agency_id' => $agency->id,

@@ -85,7 +85,7 @@ class SupplierSearchPipelineTest extends TestCase
     public function test_flight_search_service_searches_only_active_supplier_connections(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $agency = Agency::query()->where('slug', 'aurora-sky-travel')->firstOrFail();
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
 
         SupplierConnection::query()
             ->where('agency_id', $agency->id)
@@ -105,7 +105,7 @@ class SupplierSearchPipelineTest extends TestCase
     public function test_inactive_supplier_connections_are_skipped(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $agency = Agency::query()->where('slug', 'aurora-sky-travel')->firstOrFail();
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
         SupplierConnection::query()->where('agency_id', $agency->id)->update([
             'is_active' => false,
             'status' => SupplierConnectionStatus::Inactive,
@@ -123,7 +123,7 @@ class SupplierSearchPipelineTest extends TestCase
     public function test_flight_search_service_returns_normalized_offers_with_pricing_applied(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $agency = Agency::query()->where('slug', 'aurora-sky-travel')->firstOrFail();
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
         $offer = app()->make(FlightSearchService::class)->search([
             'origin' => 'LHE',
             'destination' => 'DXB',
@@ -138,14 +138,14 @@ class SupplierSearchPipelineTest extends TestCase
     public function test_public_results_page_still_works(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $this->get('/flights/results?from=LHE&to=DXB&depart='.now()->addDays(10)->toDateString())
+        $this->get('/flights/results?from=LHE&to=DXB&depart='.now()->addDays(10)->toDateString().'&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0')
             ->assertOk();
     }
 
     public function test_agent_create_booking_page_still_works(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $agentUser = User::query()->where('email', 'agent@aurora-sky-travel.demo')->firstOrFail();
+        $agentUser = User::query()->where('email', 'agent@ota.demo')->firstOrFail();
 
         $this->actingAs($agentUser)->get('/agent/bookings/create')
             ->assertOk();
@@ -178,7 +178,7 @@ class SupplierSearchPipelineTest extends TestCase
     public function test_no_credentials_appear_in_offer_snapshots(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $agency = Agency::query()->where('slug', 'aurora-sky-travel')->firstOrFail();
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
         SupplierConnection::query()->where('agency_id', $agency->id)->where('provider', SupplierProvider::Mock)->update([
             'credentials' => ['api_key' => 'SHOULD_NOT_APPEAR'],
         ]);

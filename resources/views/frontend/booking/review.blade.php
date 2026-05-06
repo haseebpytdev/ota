@@ -16,7 +16,7 @@
         $feesFromDb = (float) ($fare?->fees ?? 0);
     @endphp
     <div class="ota-rev-wrap ota-checkout-page">
-        <div class="container">
+        <div class="ota-container ota-container-narrow">
             <div class="ota-checkout-page-head ota-checkout-page-head--flush">
                 <p class="ota-checkout-page-kicker">Step 3 of 3</p>
                 <h1 class="ota-checkout-page-title">Review your booking</h1>
@@ -36,7 +36,11 @@
                         <h2 class="ota-checkout-section-title">Flight summary</h2>
                         <div class="ota-review-flight">
                             <div class="ota-review-flight__brand">
-                                <div class="ota-airline-logo">{{ $o['airline_code'] ?? 'XX' }}</div>
+                                @if(!empty($airlineLogo))
+                                    <div class="ota-airline-logo ota-airline-logo--img"><img src="{{ $airlineLogo }}" alt="{{ $o['airline_name'] ?? 'Airline' }} logo"></div>
+                                @else
+                                    <div class="ota-airline-logo">{{ $o['airline_code'] ?? 'XX' }}</div>
+                                @endif
                                 <div>
                                     <div class="ota-airline-name">{{ $o['airline_name'] ?? '' }}</div>
                                     <div class="ota-flight-no">{{ $o['carrier_code'] ?? '' }}{{ $o['flight_number'] ?? '' }}</div>
@@ -144,7 +148,7 @@
                             </label>
                         </div>
 
-                        <button type="submit" class="ota-btn-primary-lg btn btn-lg btn-block">Request booking</button>
+                        <button type="submit" class="ota-btn-primary-lg btn btn-lg btn-block">Submit booking request</button>
                         <p class="ota-checkout-disclaimer">No payment is captured. Your request is saved for the agency to confirm. No ticket is issued yet.</p>
                     </form>
                 </aside>

@@ -21,7 +21,7 @@ class FrontendRoutesTest extends TestCase
     public function test_home_responds(): void
     {
         $this->get('/')->assertOk()
-            ->assertSee('Flight availability is subject to provider confirmation.', false);
+            ->assertSee('Flight availability is subject to airline confirmation.', false);
     }
 
     /** @see README — client demo navigation checklist */
@@ -35,7 +35,7 @@ class FrontendRoutesTest extends TestCase
             '/',
             '/request-demo',
             '/flights/search',
-            '/flights/results?from=LHE&to=DXB&depart='.$depart,
+            '/flights/results?from=LHE&to=DXB&depart='.$depart.'&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0',
             '/booking/passengers?flight_id=mock-1&from=LHE&to=DXB&depart='.$depart,
         ] as $path) {
             $this->get($path)->assertOk();
@@ -43,7 +43,7 @@ class FrontendRoutesTest extends TestCase
 
         $this->get('/booking/confirmation')->assertRedirect(route('flights.search'));
 
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $this->actingAs($admin);
 
         foreach ([
@@ -61,11 +61,11 @@ class FrontendRoutesTest extends TestCase
             $this->get($path)->assertOk();
         }
 
-        $staff = User::query()->where('email', 'staff@aurora-sky-travel.demo')->firstOrFail();
+        $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
         $this->actingAs($staff);
         $this->get('/staff')->assertOk();
 
-        $agent = User::query()->where('email', 'agent@aurora-sky-travel.demo')->firstOrFail();
+        $agent = User::query()->where('email', 'agent@ota.demo')->firstOrFail();
         $this->actingAs($agent);
         $this->get('/agent')->assertOk();
 
@@ -85,7 +85,7 @@ class FrontendRoutesTest extends TestCase
 
         $depart = now()->addWeek()->format('Y-m-d');
 
-        $this->get('/flights/results?from=NYC&to=LON&depart='.$depart)
+        $this->get('/flights/results?from=NYC&to=LON&depart='.$depart.'&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0')
             ->assertOk();
 
         $this->get('/flights/details/mock-1?from=NYC&to=LON&depart='.$depart)
@@ -96,15 +96,15 @@ class FrontendRoutesTest extends TestCase
     {
         $this->seed(OtaFoundationSeeder::class);
 
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $this->actingAs($admin);
         $this->get('/admin')->assertOk();
 
-        $staff = User::query()->where('email', 'staff@aurora-sky-travel.demo')->firstOrFail();
+        $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
         $this->actingAs($staff);
         $this->get('/staff')->assertOk();
 
-        $agent = User::query()->where('email', 'agent@aurora-sky-travel.demo')->firstOrFail();
+        $agent = User::query()->where('email', 'agent@ota.demo')->firstOrFail();
         $this->actingAs($agent);
         $this->get('/agent')->assertOk();
 
@@ -116,7 +116,7 @@ class FrontendRoutesTest extends TestCase
     public function test_admin_section_routes_respond(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $this->actingAs($admin);
 
         foreach ([
@@ -137,7 +137,7 @@ class FrontendRoutesTest extends TestCase
     public function test_admin_preview_query_routes_respond(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $agency = Agency::query()->where('slug', 'aurora-sky-travel')->firstOrFail();
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
         Booking::factory()->for($agency)->create([
             'booking_reference' => 'OTA-99214',
             'status' => BookingStatus::Pending,
@@ -148,7 +148,7 @@ class FrontendRoutesTest extends TestCase
             'source_channel' => 'test',
         ]);
 
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $this->actingAs($admin);
 
         $this->get('/admin/bookings?preview=OTA-99214')->assertOk()->assertSee('OTA-99214', false);

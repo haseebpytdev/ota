@@ -53,7 +53,7 @@ class OfferValidationFlowTest extends TestCase
     public function test_offer_validation_service_applies_pricing_after_validation(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $agency = Agency::query()->where('slug', 'aurora-sky-travel')->firstOrFail();
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
         $offer = app(FlightSearchService::class)->search([
             'origin' => 'LHE',
             'destination' => 'DXB',
@@ -96,7 +96,7 @@ class OfferValidationFlowTest extends TestCase
     public function test_agent_booking_stores_validation_snapshot_in_meta(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $agentUser = User::query()->where('email', 'agent@aurora-sky-travel.demo')->firstOrFail();
+        $agentUser = User::query()->where('email', 'agent@ota.demo')->firstOrFail();
 
         $this->actingAs($agentUser)->post('/agent/bookings', [
             'from' => 'LHE',
@@ -121,7 +121,7 @@ class OfferValidationFlowTest extends TestCase
     public function test_price_changed_result_does_not_silently_create_booking(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $agency = Agency::query()->where('slug', 'aurora-sky-travel')->firstOrFail();
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
         SupplierConnection::query()->where('agency_id', $agency->id)->where('provider', SupplierProvider::Mock)->firstOrFail()->update([
             'settings' => ['force_price_change' => true],
         ]);

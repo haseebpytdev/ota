@@ -15,23 +15,39 @@ class DuffelOfferRequestBuilder
      */
     public function build(FlightSearchRequestData $request): array
     {
-        $data = [
-            'slices' => [
-                [
-                    'origin' => $this->normalizeIata($request->origin),
-                    'destination' => $this->normalizeIata($request->destination),
-                    'departure_date' => $this->normalizeDate($request->departure_date),
-                ],
-            ],
-            'passengers' => $this->buildPassengers($request),
-        ];
-
-        if ($request->return_date !== null && trim($request->return_date) !== '') {
-            $data['slices'][] = [
-                'origin' => $this->normalizeIata($request->destination),
-                'destination' => $this->normalizeIata($request->origin),
-                'departure_date' => $this->normalizeDate($request->return_date),
+        $segments = $request->segments ?? null;
+        if ($request->trip_type === 'multi_city' && is_array($segments) && count($segments) >= 2) {
+            $slices = [];
+            foreach ($segments as $segment) {
+                $slices[] = [
+                    'origin' => $this->normalizeIata((string) ($segment['origin'] ?? '')),
+                    'destination' => $this->normalizeIata((string) ($segment['destination'] ?? '')),
+                    'departure_date' => $this->normalizeDate((string) ($segment['departure_date'] ?? '')),
+                ];
+            }
+            $data = [
+                'slices' => $slices,
+                'passengers' => $this->buildPassengers($request),
             ];
+        } else {
+            $data = [
+                'slices' => [
+                    [
+                        'origin' => $this->normalizeIata($request->origin),
+                        'destination' => $this->normalizeIata($request->destination),
+                        'departure_date' => $this->normalizeDate($request->departure_date),
+                    ],
+                ],
+                'passengers' => $this->buildPassengers($request),
+            ];
+
+            if ($request->return_date !== null && trim($request->return_date) !== '') {
+                $data['slices'][] = [
+                    'origin' => $this->normalizeIata($request->destination),
+                    'destination' => $this->normalizeIata($request->origin),
+                    'departure_date' => $this->normalizeDate($request->return_date),
+                ];
+            }
         }
 
         $cabin = $this->normalizeCabin($request->cabin);

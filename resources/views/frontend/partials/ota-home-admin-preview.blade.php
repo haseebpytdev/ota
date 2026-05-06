@@ -29,7 +29,7 @@
                 </a>
             </div>
             <div class="operator-preview-cta">
-                <a href="{{ route('login') }}" class="ota-btn ota-btn-primary operator-preview-cta-btn">Speak with our team</a>
+                <a href="{{ route('contact') }}" class="ota-btn ota-btn-primary operator-preview-cta-btn">Talk to our team</a>
             </div>
         </div>
     </div>

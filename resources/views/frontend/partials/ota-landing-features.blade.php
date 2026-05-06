@@ -24,8 +24,8 @@
         </article>
         <article class="ota-feature-card">
             <div class="ota-feature-icon"><i class="fa fa-plug"></i></div>
-            <h3>{{ (string) ($cards[3]['title'] ?? 'API-ready supplier setup') }}</h3>
-            <p>{{ (string) ($cards[3]['text'] ?? 'Sabre, PIA, and airline-direct connectors are architected in — flip on when credentials land.') }}</p>
+            <h3>{{ (string) ($cards[3]['title'] ?? 'Airline and partner connectivity') }}</h3>
+            <p>{{ (string) ($cards[3]['text'] ?? 'Sabre, PIA, and airline-direct connectivity is prepared and enabled after credentials are approved.') }}</p>
         </article>
     </div>
     </div>

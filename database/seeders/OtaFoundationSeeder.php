@@ -23,7 +23,7 @@ class OtaFoundationSeeder extends Seeder
     public function run(): void
     {
         $agency = Agency::query()->updateOrCreate(
-            ['slug' => 'aurora-sky-travel'],
+            ['slug' => 'asif-travels'],
             [
                 'name' => 'Asif Travels',
                 'timezone' => 'Asia/Karachi',
@@ -34,9 +34,10 @@ class OtaFoundationSeeder extends Seeder
         );
 
         $admin = User::query()->updateOrCreate(
-            ['email' => 'admin@aurora-sky-travel.demo'],
+            ['email' => 'admin@ota.demo'],
             [
                 'name' => 'Asif Admin',
+                'username' => 'admin',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
                 'current_agency_id' => $agency->id,
@@ -45,9 +46,10 @@ class OtaFoundationSeeder extends Seeder
         );
 
         $staffUser = User::query()->updateOrCreate(
-            ['email' => 'staff@aurora-sky-travel.demo'],
+            ['email' => 'staff@ota.demo'],
             [
                 'name' => 'Asif Staff',
+                'username' => 'staff',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
                 'current_agency_id' => $agency->id,
@@ -56,13 +58,26 @@ class OtaFoundationSeeder extends Seeder
         );
 
         $agentUser = User::query()->updateOrCreate(
-            ['email' => 'agent@aurora-sky-travel.demo'],
+            ['email' => 'agent@ota.demo'],
             [
                 'name' => 'Asif Agent',
+                'username' => 'agent',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
                 'current_agency_id' => $agency->id,
                 'account_type' => AccountType::Agent,
+            ],
+        );
+
+        $customerUser = User::query()->updateOrCreate(
+            ['email' => 'customer@ota.demo'],
+            [
+                'name' => 'Asif Customer',
+                'username' => 'customer',
+                'password' => Hash::make('password'),
+                'email_verified_at' => now(),
+                'current_agency_id' => $agency->id,
+                'account_type' => AccountType::Customer,
             ],
         );
 
@@ -74,6 +89,9 @@ class OtaFoundationSeeder extends Seeder
         ]);
         $agentUser->agencies()->syncWithoutDetaching([
             $agency->id => ['role' => 'agent'],
+        ]);
+        $customerUser->agencies()->syncWithoutDetaching([
+            $agency->id => ['role' => 'customer'],
         ]);
 
         StaffProfile::query()->updateOrCreate(

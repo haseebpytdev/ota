@@ -35,4 +35,12 @@ return [
         ],
     ],
 
+    'fx' => [
+        'provider' => env('FX_RATE_PROVIDER', 'frankfurter'),
+        'endpoint' => env('FX_RATE_ENDPOINT', 'https://api.frankfurter.app/latest'),
+        'secondary_endpoint' => env('FX_RATE_SECONDARY_ENDPOINT', 'https://open.er-api.com/v6/latest'),
+        'timeout_seconds' => (int) env('FX_RATE_TIMEOUT_SECONDS', 5),
+        'cache_ttl_seconds' => (int) env('FX_RATE_CACHE_TTL_SECONDS', 900),
+    ],
+
 ];

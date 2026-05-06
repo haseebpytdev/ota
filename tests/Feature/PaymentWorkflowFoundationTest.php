@@ -40,7 +40,7 @@ class PaymentWorkflowFoundationTest extends TestCase
     {
         $this->seed(OtaFoundationSeeder::class);
         $this->withoutMiddleware(ValidateCsrfToken::class);
-        $staff = User::query()->where('email', 'staff@aurora-sky-travel.demo')->firstOrFail();
+        $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
         $booking = $this->bookingWithFare($staff->current_agency_id, ['status' => BookingStatus::PaymentPending]);
 
         $this->actingAs($staff)->post(route('staff.bookings.payments.store', $booking), [
@@ -56,7 +56,7 @@ class PaymentWorkflowFoundationTest extends TestCase
     {
         $this->seed(OtaFoundationSeeder::class);
         $this->withoutMiddleware(ValidateCsrfToken::class);
-        $agent = User::query()->where('email', 'agent@aurora-sky-travel.demo')->firstOrFail();
+        $agent = User::query()->where('email', 'agent@ota.demo')->firstOrFail();
         $booking = $this->bookingWithFare($agent->current_agency_id, []);
         $payment = BookingPayment::query()->create([
             'agency_id' => $booking->agency_id,
@@ -75,7 +75,7 @@ class PaymentWorkflowFoundationTest extends TestCase
     {
         $this->seed(OtaFoundationSeeder::class);
         $this->withoutMiddleware(ValidateCsrfToken::class);
-        $agentUser = User::query()->where('email', 'agent@aurora-sky-travel.demo')->firstOrFail();
+        $agentUser = User::query()->where('email', 'agent@ota.demo')->firstOrFail();
         $agent = $agentUser->agent();
         $booking = $this->bookingWithFare($agentUser->current_agency_id, [
             'agent_id' => $agent?->id,
@@ -96,8 +96,8 @@ class PaymentWorkflowFoundationTest extends TestCase
     {
         $this->seed(OtaFoundationSeeder::class);
         $this->withoutMiddleware(ValidateCsrfToken::class);
-        $agency = Agency::query()->where('slug', 'aurora-sky-travel')->firstOrFail();
-        $agentUser = User::query()->where('email', 'agent@aurora-sky-travel.demo')->firstOrFail();
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
+        $agentUser = User::query()->where('email', 'agent@ota.demo')->firstOrFail();
         $otherAgentUser = User::factory()->create([
             'account_type' => AccountType::Agent,
             'current_agency_id' => $agency->id,
@@ -257,7 +257,7 @@ class PaymentWorkflowFoundationTest extends TestCase
     public function test_dashboard_report_payment_breakdown_still_works(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $this->actingAs($admin)->get('/admin/reports')->assertOk();
     }
 
@@ -268,7 +268,7 @@ class PaymentWorkflowFoundationTest extends TestCase
     protected function bookingForAgencyAdmin(array $overrides = []): array
     {
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $booking = $this->bookingWithFare($admin->current_agency_id, $overrides);
 
         return [$booking, $admin];

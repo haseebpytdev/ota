@@ -7,13 +7,16 @@ use App\Enums\MarkupRuleType;
 use App\Enums\MarkupValueType;
 use App\Models\Agency;
 use App\Models\MarkupRule;
+use App\Services\Fx\LiveFxRateService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 
 class PricingRuleService
 {
     public function __construct(
         protected FlightPricingService $defaultPricing,
+        protected LiveFxRateService $fxRateService,
     ) {}
 
     /**
@@ -39,7 +42,19 @@ class PricingRuleService
             ->orderBy('id')
             ->get();
 
-        return $rules->filter(fn (MarkupRule $rule): bool => $this->matchesRule($rule, $context))->values();
+        return $rules->filter(function (MarkupRule $rule) use ($context): bool {
+            try {
+                return $this->matchesRule($rule, $context);
+            } catch (\Throwable $e) {
+                Log::warning('Skipped invalid markup rule while matching context.', [
+                    'rule_id' => $rule->id,
+                    'agency_id' => $rule->agency_id,
+                    'error' => $e->getMessage(),
+                ]);
+
+                return false;
+            }
+        })->values();
     }
 
     /**
@@ -51,15 +66,37 @@ class PricingRuleService
     {
         $priced = $this->defaultPricing->applyToOffers([$supplierFare])[0];
         $rules = $this->getApplicableRules($agency, $context);
+        $supplierCurrency = strtoupper((string) ($supplierFare['currency'] ?? $priced['currency'] ?? 'PKR'));
+        $sourceBaseFare = (float) ($priced['base_fare'] ?? 0);
+        $sourceTaxes = (float) ($priced['taxes'] ?? 0);
+        $sourceSupplierTotal = $sourceBaseFare + $sourceTaxes;
+        $fxMeta = $this->fxRateService->getRate($supplierCurrency, 'PKR');
+        $conversionStatus = (string) ($fxMeta['status'] ?? 'conversion_missing');
+        $fxRate = (float) ($fxMeta['rate'] ?? 0);
+        $pricingCurrency = $supplierCurrency;
 
-        $baseFare = (float) ($priced['base_fare'] ?? 0);
-        $taxes = (float) ($priced['taxes'] ?? 0);
-        $supplierTotal = $baseFare + $taxes;
+        $baseFare = $sourceBaseFare;
+        $taxes = $sourceTaxes;
+        $supplierTotal = $sourceSupplierTotal;
+        if ($conversionStatus === 'converted' && $fxRate > 0) {
+            $baseFare = round($sourceBaseFare * $fxRate, 2);
+            $taxes = round($sourceTaxes * $fxRate, 2);
+            $supplierTotal = round($baseFare + $taxes, 2);
+            $pricingCurrency = 'PKR';
+        } elseif ($conversionStatus === 'same_currency') {
+            $pricingCurrency = $supplierCurrency;
+        }
 
         $components = [
             'base_fare' => $baseFare,
             'taxes' => $taxes,
             'supplier_total' => $supplierTotal,
+            'supplier_total_source' => $sourceSupplierTotal,
+            'supplier_currency' => $supplierCurrency,
+            'pricing_currency' => $pricingCurrency,
+            'conversion_status' => $conversionStatus,
+            'fx_rate' => $fxRate > 0 ? $fxRate : null,
+            'fx_fetched_at' => $fxMeta['fetched_at'] ?? null,
             'admin_markup' => 0.0,
             'route_markup' => 0.0,
             'airline_markup' => 0.0,
@@ -71,8 +108,8 @@ class PricingRuleService
         $applied = [];
 
         if ($rules->isEmpty()) {
-            $components['admin_markup'] = (float) ($priced['markup'] ?? 0);
-            $components['service_fee'] = (float) ($priced['service_fee'] ?? 0);
+            $components['admin_markup'] = round($baseFare * 0.035, 2);
+            $components['service_fee'] = $conversionStatus === 'conversion_missing' ? 0.0 : (float) ($priced['service_fee'] ?? 0);
             $components['final_total'] = $supplierTotal + $components['admin_markup'] + $components['service_fee'];
 
             return $components + [
@@ -81,12 +118,32 @@ class PricingRuleService
         }
 
         foreach ($rules as $rule) {
-            $amount = $this->ruleAmount($rule, $supplierTotal);
+            try {
+                $amount = $this->ruleAmount($rule, $supplierTotal);
+            } catch (\Throwable $e) {
+                Log::warning('Skipped invalid markup rule while pricing.', [
+                    'rule_id' => $rule->id,
+                    'agency_id' => $rule->agency_id,
+                    'error' => $e->getMessage(),
+                ]);
+
+                continue;
+            }
             if ($amount <= 0) {
                 continue;
             }
 
-            $bucket = $this->resolveBucket($rule);
+            try {
+                $bucket = $this->resolveBucket($rule);
+            } catch (\Throwable $e) {
+                Log::warning('Skipped invalid markup rule bucket while pricing.', [
+                    'rule_id' => $rule->id,
+                    'agency_id' => $rule->agency_id,
+                    'error' => $e->getMessage(),
+                ]);
+
+                continue;
+            }
             $components[$bucket] += $amount;
 
             $applied[] = [

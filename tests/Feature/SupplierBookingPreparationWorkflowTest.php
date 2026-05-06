@@ -26,7 +26,7 @@ class SupplierBookingPreparationWorkflowTest extends TestCase
     {
         $this->seed(OtaFoundationSeeder::class);
         $this->withoutMiddleware(ValidateCsrfToken::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $booking = $this->eligibleBooking();
 
         $this->actingAs($admin)->post(route('admin.bookings.supplier-booking', $booking))->assertRedirect();
@@ -38,7 +38,7 @@ class SupplierBookingPreparationWorkflowTest extends TestCase
     {
         $this->seed(OtaFoundationSeeder::class);
         $this->withoutMiddleware(ValidateCsrfToken::class);
-        $staff = User::query()->where('email', 'staff@aurora-sky-travel.demo')->firstOrFail();
+        $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
         $booking = $this->eligibleBooking();
 
         $this->actingAs($staff)->post(route('staff.bookings.supplier-booking', $booking))->assertRedirect();
@@ -49,7 +49,7 @@ class SupplierBookingPreparationWorkflowTest extends TestCase
     public function test_agent_cannot_create_supplier_booking(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $agent = User::query()->where('email', 'agent@aurora-sky-travel.demo')->firstOrFail();
+        $agent = User::query()->where('email', 'agent@ota.demo')->firstOrFail();
         $booking = $this->eligibleBooking();
 
         $this->actingAs($agent)->post(route('admin.bookings.supplier-booking', $booking))->assertForbidden();
@@ -71,7 +71,7 @@ class SupplierBookingPreparationWorkflowTest extends TestCase
     {
         $this->seed(OtaFoundationSeeder::class);
         $this->withoutMiddleware(ValidateCsrfToken::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $otherAgency = Agency::factory()->create();
         $booking = Booking::factory()->create([
             'agency_id' => $otherAgency->id,
@@ -86,7 +86,7 @@ class SupplierBookingPreparationWorkflowTest extends TestCase
     {
         $this->seed(OtaFoundationSeeder::class);
         $this->withoutMiddleware(ValidateCsrfToken::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $booking = Booking::factory()->create([
             'agency_id' => $admin->current_agency_id,
             'status' => BookingStatus::Confirmed,
@@ -100,7 +100,7 @@ class SupplierBookingPreparationWorkflowTest extends TestCase
     {
         $this->seed(OtaFoundationSeeder::class);
         $this->withoutMiddleware(ValidateCsrfToken::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $booking = $this->eligibleBooking(['status' => BookingStatus::Pending]);
 
         $this->actingAs($admin)->post(route('admin.bookings.supplier-booking', $booking))->assertSessionHasErrors('supplier_booking');
@@ -110,7 +110,7 @@ class SupplierBookingPreparationWorkflowTest extends TestCase
     {
         $this->seed(OtaFoundationSeeder::class);
         $this->withoutMiddleware(ValidateCsrfToken::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $booking = $this->eligibleBooking();
 
         $this->actingAs($admin)->post(route('admin.bookings.supplier-booking', $booking));
@@ -123,7 +123,7 @@ class SupplierBookingPreparationWorkflowTest extends TestCase
     {
         $this->seed(OtaFoundationSeeder::class);
         $this->withoutMiddleware(ValidateCsrfToken::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $booking = $this->eligibleBooking();
 
         $this->actingAs($admin)->post(route('admin.bookings.supplier-booking', $booking));
@@ -138,7 +138,7 @@ class SupplierBookingPreparationWorkflowTest extends TestCase
     {
         $this->seed(OtaFoundationSeeder::class);
         $this->withoutMiddleware(ValidateCsrfToken::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $booking = $this->eligibleBooking();
 
         $this->actingAs($admin)->post(route('admin.bookings.supplier-booking', $booking));
@@ -151,7 +151,7 @@ class SupplierBookingPreparationWorkflowTest extends TestCase
         $this->seed(OtaFoundationSeeder::class);
         $this->withoutMiddleware(ValidateCsrfToken::class);
         Http::fake();
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $booking = $this->eligibleBooking();
         $sabreConnection = SupplierConnection::query()->where('agency_id', $booking->agency_id)->where('provider', SupplierProvider::Sabre)->firstOrFail();
         $sabreConnection->update(['is_active' => true, 'status' => SupplierConnectionStatus::Active]);
@@ -169,7 +169,7 @@ class SupplierBookingPreparationWorkflowTest extends TestCase
     {
         $this->seed(OtaFoundationSeeder::class);
         $this->withoutMiddleware(ValidateCsrfToken::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $booking = $this->eligibleBooking();
         $sabreConnection = SupplierConnection::query()->where('agency_id', $booking->agency_id)->where('provider', SupplierProvider::Sabre)->firstOrFail();
         $sabreConnection->update(['is_active' => true, 'status' => SupplierConnectionStatus::Active]);
@@ -189,7 +189,7 @@ class SupplierBookingPreparationWorkflowTest extends TestCase
     {
         $this->seed(OtaFoundationSeeder::class);
         $this->withoutMiddleware(ValidateCsrfToken::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $booking = $this->eligibleBooking();
 
         $this->actingAs($admin)->post(route('admin.bookings.supplier-booking', $booking));
@@ -205,7 +205,7 @@ class SupplierBookingPreparationWorkflowTest extends TestCase
     {
         $this->seed(OtaFoundationSeeder::class);
         $this->withoutMiddleware(ValidateCsrfToken::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $booking = $this->eligibleBooking(['status' => BookingStatus::Confirmed]);
 
         $this->actingAs($admin)->post(route('admin.bookings.supplier-booking', $booking));
@@ -224,7 +224,7 @@ class SupplierBookingPreparationWorkflowTest extends TestCase
      */
     protected function eligibleBooking(array $overrides = []): Booking
     {
-        $agency = Agency::query()->where('slug', 'aurora-sky-travel')->firstOrFail();
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
         $mockConnection = SupplierConnection::query()->where('agency_id', $agency->id)->where('provider', SupplierProvider::Mock)->firstOrFail();
 
         return Booking::factory()->create(array_merge([

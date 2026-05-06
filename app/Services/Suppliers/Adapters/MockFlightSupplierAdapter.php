@@ -22,12 +22,21 @@ class MockFlightSupplierAdapter implements FlightSupplierInterface
 
     public function search(FlightSearchRequestData $request, SupplierConnection $connection): FlightSearchResultData
     {
+        if ($request->trip_type === 'multi_city') {
+            return new FlightSearchResultData(
+                supplier_provider: SupplierProvider::Mock,
+                offers: [],
+                warnings: ['Multi-city search is not available for the demo supplier. Try a one-way or round-trip search, or connect a live supplier.'],
+                meta: ['connection_id' => $connection->id]
+            );
+        }
+
         $rawOffers = $this->mockSupplier->search([
             'origin' => $request->origin,
             'destination' => $request->destination,
             'depart_date' => $request->departure_date,
         ]);
-        $meta = config('demo-flights.offers', []);
+        $meta = config('ota-flights.offers', []);
 
         $offers = array_map(function (array $rawOffer) use ($connection, $meta): NormalizedFlightOfferData {
             $offerId = (string) ($rawOffer['id'] ?? 'mock-unknown');

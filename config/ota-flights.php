@@ -1,9 +1,5 @@
 <?php
 
-/**
- * Demo-only display overlays for mock flight rows (no API).
- * Keys match MockFlightSupplier offer ids.
- */
 return [
     'offers' => [
         'mock-1' => [

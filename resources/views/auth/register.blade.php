@@ -4,7 +4,7 @@
 
 @section('content')
     <h2>Create your Asif Travels account</h2>
-    <p class="ota-auth-help">Book flights, track requests, submit payments, and download your travel documents.</p>
+    <p class="ota-auth-help">Book flights, track your booking requests, submit payment proof, and access travel documents from one place.</p>
     <div class="ota-auth-alert" style="background:#eff6ff;border-color:#bfdbfe;color:#1e3a8a;">
         <strong>Customer benefits:</strong> fast booking flow, document access, and real-time request visibility.
     </div>
@@ -61,5 +61,4 @@
     </form>
 
     <p style="margin-top:16px;color:#64748b;">Already registered? <a class="ota-auth-link" href="{{ route('login') }}">Log in</a></p>
-    <p style="margin-top:8px;color:#64748b;">Need help? <a class="ota-auth-link" href="{{ route('home') }}#support">Contact support</a></p>
 @endsection

@@ -36,17 +36,27 @@ class StoreSupplierConnectionRequest extends FormRequest
     public function withValidator($validator): void
     {
         $validator->after(function ($validator): void {
-            $provider = $this->input('provider');
+            $provider = (string) $this->input('provider');
             $credentials = $this->input('credentials', []);
             if (! is_array($credentials)) {
                 $credentials = [];
             }
-            $keys = array_map('strtolower', array_keys(array_filter($credentials, fn ($value): bool => trim((string) $value) !== '')));
+            $filled = array_filter($credentials, fn ($value): bool => trim((string) $value) !== '');
+            $keys = array_map('strtolower', array_keys($filled));
+            $providerFields = (array) config('supplier_credentials.providers.'.$provider.'.fields', []);
 
-            if ($provider === SupplierProvider::Sabre->value) {
-                if (! in_array('client_id', $keys, true) || ! in_array('client_secret', $keys, true)) {
-                    $validator->errors()->add('credentials', 'Sabre usually requires client_id and client_secret.');
+            foreach ($providerFields as $fieldKey => $meta) {
+                $required = (bool) ($meta['required'] ?? false);
+                if (! $required) {
+                    continue;
                 }
+                if (! in_array(strtolower($fieldKey), $keys, true)) {
+                    $validator->errors()->add('credentials.'.$fieldKey, 'This field is required for '.strtoupper($provider).'.');
+                }
+            }
+
+            if ($provider === SupplierProvider::Mock->value) {
+                return;
             }
 
             if ($provider === SupplierProvider::Pia->value) {
@@ -64,10 +74,6 @@ class StoreSupplierConnectionRequest extends FormRequest
                 if (! $hasApiKey && ! $hasToken && ! $hasUserPass) {
                     $validator->errors()->add('credentials', 'Airline direct usually needs api_key, token, or username/password.');
                 }
-            }
-
-            if ($provider === SupplierProvider::Duffel->value && ! in_array('access_token', $keys, true)) {
-                $validator->errors()->add('credentials', 'Duffel requires access_token.');
             }
         });
     }

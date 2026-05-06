@@ -170,7 +170,7 @@ class SabreSandboxSearchTest extends TestCase
     public function test_flight_search_service_includes_sabre_offers_when_connection_active(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $agency = Agency::query()->where('slug', 'aurora-sky-travel')->firstOrFail();
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
         $fixture = json_decode(file_get_contents(base_path('tests/Fixtures/sabre_search_response.json')), true);
 
         $sabreConnection = SupplierConnection::query()->where('agency_id', $agency->id)->where('provider', SupplierProvider::Sabre)->firstOrFail();
@@ -199,7 +199,7 @@ class SabreSandboxSearchTest extends TestCase
     public function test_inactive_sabre_connection_is_skipped(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $agency = Agency::query()->where('slug', 'aurora-sky-travel')->firstOrFail();
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
         $sabreConnection = SupplierConnection::query()->where('agency_id', $agency->id)->where('provider', SupplierProvider::Sabre)->firstOrFail();
         $sabreConnection->update([
             'is_active' => false,
@@ -218,7 +218,7 @@ class SabreSandboxSearchTest extends TestCase
     public function test_pricing_rule_service_applies_markup_to_sabre_normalized_offers(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $agency = Agency::query()->where('slug', 'aurora-sky-travel')->firstOrFail();
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
         $fixture = json_decode(file_get_contents(base_path('tests/Fixtures/sabre_search_response.json')), true);
 
         $sabreConnection = SupplierConnection::query()->where('agency_id', $agency->id)->where('provider', SupplierProvider::Sabre)->firstOrFail();
@@ -248,7 +248,7 @@ class SabreSandboxSearchTest extends TestCase
     public function test_public_results_page_can_render_sabre_offers(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $agency = Agency::query()->where('slug', 'aurora-sky-travel')->firstOrFail();
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
         $fixture = json_decode(file_get_contents(base_path('tests/Fixtures/sabre_search_response.json')), true);
         $sabreConnection = SupplierConnection::query()->where('agency_id', $agency->id)->where('provider', SupplierProvider::Sabre)->firstOrFail();
         $sabreConnection->update([
@@ -264,15 +264,20 @@ class SabreSandboxSearchTest extends TestCase
             '*/v5/offers/shop' => Http::response($fixture, 200),
         ]);
 
-        $this->get('/flights/results?from=LHE&to=DXB&depart=2026-06-10')
+        $page = $this->get('/flights/results?from=LHE&to=DXB&depart=2026-06-10&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0')->assertOk();
+        preg_match('/data-search-id="([^"]+)"/', $page->getContent(), $matches);
+        $searchId = $matches[1] ?? '';
+        $this->assertNotSame('', $searchId);
+        $this->getJson('/flights/results/data?search_id='.$searchId.'&page=1&per_page=12')
             ->assertOk()
-            ->assertSee('PK');
+            ->assertJsonFragment(['provider' => 'sabre'])
+            ->assertJsonFragment(['airline_code' => 'PK']);
     }
 
     public function test_no_credentials_or_tokens_appear_in_normalized_offer_snapshot(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $agency = Agency::query()->where('slug', 'aurora-sky-travel')->firstOrFail();
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
         $fixture = json_decode(file_get_contents(base_path('tests/Fixtures/sabre_search_response.json')), true);
         $sabreConnection = SupplierConnection::query()->where('agency_id', $agency->id)->where('provider', SupplierProvider::Sabre)->firstOrFail();
         $sabreConnection->update([
@@ -303,7 +308,7 @@ class SabreSandboxSearchTest extends TestCase
     public function test_mock_supplier_continues_to_work(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $agency = Agency::query()->where('slug', 'aurora-sky-travel')->firstOrFail();
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
 
         $offers = app(FlightSearchService::class)->search([
             'origin' => 'LHE',

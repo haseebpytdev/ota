@@ -25,7 +25,7 @@ class OperatorAuthTest extends TestCase
         $this->withoutMiddleware([ValidateCsrfToken::class]);
 
         $response = $this->post('/login', [
-            'email' => 'admin@aurora-sky-travel.demo',
+            'email' => 'admin@ota.demo',
             'password' => 'password',
         ]);
 
@@ -39,7 +39,7 @@ class OperatorAuthTest extends TestCase
         $this->withoutMiddleware([ValidateCsrfToken::class]);
 
         $this->post('/login', [
-            'email' => 'staff@aurora-sky-travel.demo',
+            'email' => 'staff@ota.demo',
             'password' => 'password',
         ])->assertRedirect(route('staff.dashboard', absolute: false));
     }
@@ -50,7 +50,7 @@ class OperatorAuthTest extends TestCase
         $this->withoutMiddleware([ValidateCsrfToken::class]);
 
         $this->post('/login', [
-            'email' => 'agent@aurora-sky-travel.demo',
+            'email' => 'agent@ota.demo',
             'password' => 'password',
         ])->assertRedirect(route('agent.dashboard', absolute: false));
     }
@@ -74,7 +74,7 @@ class OperatorAuthTest extends TestCase
     public function test_staff_cannot_access_admin(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $staff = User::query()->where('email', 'staff@aurora-sky-travel.demo')->firstOrFail();
+        $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
 
         $this->actingAs($staff);
         $this->get('/admin')->assertForbidden();
@@ -83,7 +83,7 @@ class OperatorAuthTest extends TestCase
     public function test_staff_can_access_staff_dashboard(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $staff = User::query()->where('email', 'staff@aurora-sky-travel.demo')->firstOrFail();
+        $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
 
         $this->actingAs($staff);
         $this->get('/staff')->assertOk();
@@ -92,7 +92,7 @@ class OperatorAuthTest extends TestCase
     public function test_agent_can_access_agent_dashboard(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $agent = User::query()->where('email', 'agent@aurora-sky-travel.demo')->firstOrFail();
+        $agent = User::query()->where('email', 'agent@ota.demo')->firstOrFail();
 
         $this->actingAs($agent);
         $this->get('/agent')->assertOk();
@@ -101,7 +101,7 @@ class OperatorAuthTest extends TestCase
     public function test_agent_cannot_access_admin(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $agent = User::query()->where('email', 'agent@aurora-sky-travel.demo')->firstOrFail();
+        $agent = User::query()->where('email', 'agent@ota.demo')->firstOrFail();
 
         $this->actingAs($agent);
         $this->get('/admin')->assertForbidden();
@@ -122,7 +122,7 @@ class OperatorAuthTest extends TestCase
     {
         $this->seed(OtaFoundationSeeder::class);
 
-        $staff = User::query()->where('email', 'staff@aurora-sky-travel.demo')->firstOrFail();
+        $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
         $agencyId = $staff->current_agency_id;
 
         $staff->forceFill(['current_agency_id' => null])->save();
@@ -144,7 +144,7 @@ class OperatorAuthTest extends TestCase
     public function test_public_flight_results_accessible_without_login(): void
     {
         $depart = now()->addWeek()->format('Y-m-d');
-        $this->get('/flights/results?from=LHE&to=DXB&depart='.$depart)->assertOk();
+        $this->get('/flights/results?from=LHE&to=DXB&depart='.$depart.'&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0')->assertOk();
     }
 
     public function test_platform_admin_can_access_admin_without_agency_membership(): void

@@ -47,7 +47,7 @@ class PublicBookingLayoutSmokeTest extends TestCase
         $depart = now()->addWeek()->format('Y-m-d');
         foreach ([
             $this->get('/'),
-            $this->get('/flights/results?from=LHE&to=DXB&depart='.$depart),
+            $this->get('/flights/results?from=LHE&to=DXB&depart='.$depart.'&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0'),
         ] as $response) {
             $response->assertOk();
             $h = $response->getContent();

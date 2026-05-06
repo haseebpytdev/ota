@@ -17,7 +17,8 @@ class FlightPricingService
     {
         return array_map(function (array $offer): array {
             $base = (float) ($offer['base_fare'] ?? 0);
-            $taxes = round($base * 0.08, 2);
+            $hasExplicitTaxes = array_key_exists('taxes', $offer) && $offer['taxes'] !== null;
+            $taxes = $hasExplicitTaxes ? (float) $offer['taxes'] : round($base * 0.08, 2);
             $markup = round($base * ($this->markupPercent / 100), 2);
             $total = round($base + $taxes + $markup + $this->serviceFeePkr, 2);
 

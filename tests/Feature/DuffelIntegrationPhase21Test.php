@@ -35,7 +35,7 @@ class DuffelIntegrationPhase21Test extends TestCase
     public function test_duffel_readiness_check_accepts_access_token(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $connection = SupplierConnection::factory()->create([
             'agency_id' => $admin->current_agency_id,
             'provider' => SupplierProvider::Duffel,
@@ -79,7 +79,7 @@ class DuffelIntegrationPhase21Test extends TestCase
     public function test_duffel_normalizer_maps_offer_payload(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $agency = Agency::query()->where('slug', 'aurora-sky-travel')->firstOrFail();
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
         $connection = SupplierConnection::factory()->create([
             'agency_id' => $agency->id,
             'provider' => SupplierProvider::Duffel,
@@ -96,12 +96,15 @@ class DuffelIntegrationPhase21Test extends TestCase
         $this->assertSame('duffel', $offer['supplier_provider']);
         $this->assertSame('off_0001', $offer['raw_reference']);
         $this->assertSame('USD', $offer['fare_breakdown']['currency']);
+        $this->assertSame(200.0, (float) $offer['fare_breakdown']['base_fare']);
+        $this->assertSame(40.0, (float) $offer['fare_breakdown']['taxes']);
+        $this->assertSame(245.0, (float) $offer['fare_breakdown']['supplier_total']);
     }
 
     public function test_duffel_adapter_handles_missing_token_and_timeout_safely(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $agency = Agency::query()->where('slug', 'aurora-sky-travel')->firstOrFail();
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
         $adapter = app(DuffelFlightSupplierAdapter::class);
 
         $missingTokenConnection = SupplierConnection::factory()->create([
@@ -133,7 +136,7 @@ class DuffelIntegrationPhase21Test extends TestCase
     public function test_duffel_headers_are_sent_and_search_service_includes_duffel(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $agency = Agency::query()->where('slug', 'aurora-sky-travel')->firstOrFail();
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
         $connection = SupplierConnection::factory()->create([
             'agency_id' => $agency->id,
             'provider' => SupplierProvider::Duffel,
@@ -174,7 +177,7 @@ class DuffelIntegrationPhase21Test extends TestCase
     public function test_duffel_validate_offer_returns_valid_and_price_changed(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $agency = Agency::query()->where('slug', 'aurora-sky-travel')->firstOrFail();
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
         $connection = SupplierConnection::factory()->create([
             'agency_id' => $agency->id,
             'provider' => SupplierProvider::Duffel,
@@ -212,8 +215,8 @@ class DuffelIntegrationPhase21Test extends TestCase
     public function test_duffel_order_builder_and_supplier_booking_workflow(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
-        $agency = Agency::query()->where('slug', 'aurora-sky-travel')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
         $connection = SupplierConnection::factory()->create([
             'agency_id' => $agency->id,
             'provider' => SupplierProvider::Duffel,
@@ -282,7 +285,7 @@ class DuffelIntegrationPhase21Test extends TestCase
         $this->seed(OtaFoundationSeeder::class);
         $token = 'duffel_test_never_leak_me';
         SupplierConnection::factory()->create([
-            'agency_id' => Agency::query()->where('slug', 'aurora-sky-travel')->firstOrFail()->id,
+            'agency_id' => Agency::query()->where('slug', 'asif-travels')->firstOrFail()->id,
             'provider' => SupplierProvider::Duffel,
             'environment' => SupplierEnvironment::Sandbox,
             'status' => SupplierConnectionStatus::Active,
@@ -307,7 +310,7 @@ class DuffelIntegrationPhase21Test extends TestCase
     public function test_duffel_failed_search_creates_safe_diagnostic_log(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $agency = Agency::query()->where('slug', 'aurora-sky-travel')->firstOrFail();
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
         SupplierConnection::query()->where('agency_id', $agency->id)->where('provider', 'mock')->update([
             'is_active' => false,
             'status' => SupplierConnectionStatus::Inactive,
@@ -346,8 +349,8 @@ class DuffelIntegrationPhase21Test extends TestCase
     public function test_duffel_order_create_creates_diagnostic_log(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
-        $agency = Agency::query()->where('slug', 'aurora-sky-travel')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
         $connection = SupplierConnection::factory()->create([
             'agency_id' => $agency->id,
             'provider' => SupplierProvider::Duffel,
@@ -400,7 +403,7 @@ class DuffelIntegrationPhase21Test extends TestCase
     public function test_duffel_cli_test_command_hides_token(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $agency = Agency::query()->where('slug', 'aurora-sky-travel')->firstOrFail();
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
         $connection = SupplierConnection::factory()->create([
             'agency_id' => $agency->id,
             'provider' => SupplierProvider::Duffel,
@@ -433,7 +436,7 @@ class DuffelIntegrationPhase21Test extends TestCase
     public function test_results_page_shows_safe_warning_when_duffel_search_fails(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $agency = Agency::query()->where('slug', 'aurora-sky-travel')->firstOrFail();
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
         SupplierConnection::query()->where('agency_id', $agency->id)->where('provider', 'mock')->update([
             'is_active' => false,
             'status' => SupplierConnectionStatus::Inactive,
@@ -449,7 +452,7 @@ class DuffelIntegrationPhase21Test extends TestCase
         ]);
         Http::fake(['https://api.duffel.com/air/offer_requests*' => Http::response([], 500)]);
 
-        $this->get('/flights/results?from=LHE&to=DXB&depart='.now()->addDays(10)->toDateString())
+        $this->get('/flights/results?from=LHE&to=DXB&depart='.now()->addDays(10)->toDateString().'&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0')
             ->assertOk()
             ->assertSee('Provider search is temporarily unavailable.');
     }

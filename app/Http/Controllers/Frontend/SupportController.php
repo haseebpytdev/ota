@@ -7,8 +7,13 @@ use Illuminate\View\View;
 
 class SupportController extends Controller
 {
-    public function show(): View
+    public function support(): View
     {
         return view('frontend.support');
+    }
+
+    public function contact(): View
+    {
+        return view('frontend.contact');
     }
 }

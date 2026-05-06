@@ -1,8 +1,8 @@
 @php
     /** TourNest: legacy scripts only; public shell is overridden by ota-public.css */
     $tn = asset('vendor/tournest/assets');
-    $brand = config('demo-brand', []);
-    $client = config('demo-client', []);
+    $brand = config('ota-brand', []);
+    $client = config('ota-client', []);
     $dbBranding = $publicBranding ?? null;
     $dbSettings = $agencySettings ?? ($dbBranding['settings'] ?? null);
     $brandName = $dbSettings?->display_name ?: ($client['agency_name'] ?? ($brand['product_name'] ?? 'Asif Travels'));
@@ -37,7 +37,7 @@
     <link rel="stylesheet" href="{{ $tn }}/css/font-awesome.min.css" />
     <link rel="stylesheet" href="{{ $tn }}/css/bootstrap.min.css" />
     <link rel="stylesheet" href="{{ asset('css/ota-design-system.css') }}?v=1" />
-    <link rel="stylesheet" href="{{ asset('css/ota-public.css') }}?v=14" />
+    <link rel="stylesheet" href="{{ asset('css/ota-public.css') }}?v=16" />
 
     <style>
         :root {
@@ -53,8 +53,8 @@
             <div class="ota-slim-topbar-inner">
                 <span><i class="fa fa-headphones"></i> 24/7 Support</span>
                 <span><i class="fa fa-lock"></i> Secure booking</span>
+                <span><i class="fa fa-whatsapp"></i> Fast response</span>
                 <span><i class="fa fa-suitcase"></i> Flexible travel options</span>
-                <span><i class="fa fa-whatsapp"></i> Fast support response</span>
             </div>
         </div>
 
@@ -73,11 +73,13 @@
                 <input type="checkbox" id="ota-nav-open" class="ota-nav-toggle" autocomplete="off">
                 <label for="ota-nav-open" class="ota-burger" aria-label="Open menu"><i class="fa fa-bars"></i></label>
                 <nav class="ota-nav-links" aria-label="Primary">
-                    <a href="{{ route('home') }}">Home</a>
-                    <a href="{{ route('flights.search') }}">Flights</a>
-                    <a href="{{ route('agent.register') }}">Agent Registration</a>
-                    <a href="{{ route('support') }}">Support</a>
-                    <a href="{{ route('contact') }}">Contact</a>
+                    <div class="ota-nav-links-desktop">
+                        <a href="{{ route('home') }}">Home</a>
+                        <a href="{{ route('flights.search') }}">Flights</a>
+                        <a href="{{ route('agent.register') }}">Agent Network</a>
+                        <a href="{{ route('support') }}">Support</a>
+                        <a href="{{ route('contact') }}">Contact</a>
+                    </div>
                     <div class="ota-nav-dropdown">
                         <button type="button" class="ota-nav-dropdown-toggle">Login <i class="fa fa-angle-down" aria-hidden="true"></i></button>
                         <div class="ota-nav-dropdown-menu">
@@ -85,11 +87,11 @@
                                 <span class="ota-nav-dropdown-title">Customer Login</span>
                                 <span class="ota-nav-dropdown-meta">Manage trips and documents</span>
                             </a>
-                            <a href="{{ url('/agent') }}">
+                            <a href="{{ route('login', ['type' => 'agent']) }}">
                                 <span class="ota-nav-dropdown-title">Agent Login</span>
                                 <span class="ota-nav-dropdown-meta">Manage booking requests and commissions</span>
                             </a>
-                            <a href="{{ url('/admin') }}">
+                            <a href="{{ route('login', ['type' => 'operator']) }}">
                                 <span class="ota-nav-dropdown-title">Operator Login</span>
                                 <span class="ota-nav-dropdown-meta">Operations and back-office access</span>
                             </a>
@@ -102,15 +104,37 @@
                                 <span class="ota-nav-dropdown-title">Customer Signup</span>
                                 <span class="ota-nav-dropdown-meta">Book and manage your trips</span>
                             </a>
-                            <a href="{{ route('agent.register') }}">
+                            <a href="{{ route('agent.register.form') }}">
                                 <span class="ota-nav-dropdown-title">Agent Registration</span>
                                 <span class="ota-nav-dropdown-meta">Apply for partner access</span>
                             </a>
                         </div>
                     </div>
+                    <div class="ota-nav-mobile-groups" aria-label="Mobile menu sections">
+                        <div class="ota-mobile-group">
+                            <div class="ota-mobile-group-title">Book</div>
+                            <a href="{{ route('flights.search') }}">Search Flights</a>
+                            <a href="{{ route('lookup-booking.form') }}">Lookup Booking</a>
+                        </div>
+                        <div class="ota-mobile-group">
+                            <div class="ota-mobile-group-title">Accounts</div>
+                            <a href="{{ route('login') }}">Customer Login</a>
+                            <a href="{{ route('register') }}">Customer Signup</a>
+                            <a href="{{ route('login', ['type' => 'agent']) }}">Agent Login</a>
+                            <a href="{{ route('agent.register.form') }}">Agent Registration</a>
+                            <a href="{{ route('login', ['type' => 'operator']) }}">Operator Login</a>
+                        </div>
+                        <div class="ota-mobile-group">
+                            <div class="ota-mobile-group-title">Help</div>
+                            <a href="{{ route('support') }}">Support</a>
+                            <a href="{{ route('contact') }}">Contact</a>
+                        </div>
+                    </div>
                     <a href="{{ route('flights.search') }}" class="ota-nav-cta ota-nav-cta-inmenu">Book Flights</a>
                 </nav>
-                <a href="{{ route('flights.search') }}" class="ota-nav-cta ota-nav-cta-floating">Book Flights</a>
+                @unless (request()->routeIs('flights.search'))
+                    <a href="{{ route('flights.search') }}" class="ota-nav-cta ota-nav-cta-floating">Book Flights</a>
+                @endunless
             </div>
         </header>
     </div>
@@ -129,17 +153,17 @@
                         <span style="color:#94a3b8;font-size:0.8rem;">{{ $client['domain_preview'] ?? '' }}</span>
                     </div>
                     <p style="margin:0.5rem 0 0;font-size:0.78rem;line-height:1.45;color:#64748b;">{{ $footerAbout }}</p>
-                    <p class="ota-powered-by">Trusted OTA services by {{ $brandName }}</p>
+                    <p class="ota-powered-by">Flight booking support, travel assistance, and customer care from {{ $brandName }}.</p>
                 </div>
                 <div>
                     <h4>Quick links</h4>
                     <a href="{{ route('home') }}">Home</a>
-                    <a href="{{ route('flights.search') }}">Flight search</a>
+                    <a href="{{ route('flights.search') }}">Flights</a>
                     <a href="{{ route('support') }}">Support</a>
                     <a href="{{ route('contact') }}">Contact</a>
                     <a href="{{ route('login') }}">Login</a>
-                    <a href="{{ route('register') }}">Customer sign up</a>
-                    <a href="{{ route('agent.register') }}">Agent sign up</a>
+                    <a href="{{ route('register') }}">Customer Signup</a>
+                    <a href="{{ route('agent.register.form') }}">Agent Registration</a>
                 </div>
                 <div>
                     <h4>Popular routes</h4>
@@ -158,7 +182,7 @@
             </div>
             <div class="ota-footer-bar">
                 <span>{{ $footerCopyright }}</span>
-                <span>Flight availability is subject to provider confirmation.</span>
+                <span>Flight availability is subject to airline confirmation.</span>
             </div>
         </div>
     </footer>
@@ -185,6 +209,28 @@
                     dropdowns.forEach(function (item) { item.classList.remove('is-open'); });
                 }
             });
+        })();
+
+        (function () {
+            var root = document.documentElement;
+            var header = document.querySelector('.ota-site-header');
+            if (!root || !header) return;
+
+            function syncHeaderOffset() {
+                var height = Math.max(0, Math.round(header.getBoundingClientRect().height));
+                if (height > 0) {
+                    root.style.setProperty('--ota-fixed-header-height', height + 'px');
+                }
+            }
+
+            syncHeaderOffset();
+            window.addEventListener('resize', syncHeaderOffset, { passive: true });
+            var toggle = document.getElementById('ota-nav-open');
+            if (toggle) {
+                toggle.addEventListener('change', function () {
+                    window.setTimeout(syncHeaderOffset, 40);
+                });
+            }
         })();
     </script>
     @stack('scripts')

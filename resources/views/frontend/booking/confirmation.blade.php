@@ -20,13 +20,13 @@
         };
     @endphp
     <section class="ota-confirmation-wrap ota-confirmation-page">
-        <div class="container">
+        <div class="ota-container ota-container-narrow">
             <div class="ota-confirm-hero-card">
                 <div class="ota-confirm-success-ring" aria-hidden="true">
                     <span class="ota-confirm-success-icon"><i class="fa fa-check"></i></span>
                 </div>
                 <h1 class="ota-confirm-title">Booking request received</h1>
-                <p class="ota-confirm-sub">Your booking request has been received and saved. No e-ticket or PNR has been issued yet.</p>
+                <p class="ota-confirm-sub">Your booking request has been saved. No ticket has been issued.</p>
 
                 <div class="ota-confirm-meta">
                     <div class="ota-confirm-ref">
@@ -42,7 +42,7 @@
 
             <div class="ota-confirm-banner" role="status">
                 <strong>Booking submitted.</strong>
-                Inventory and fares are illustrative. No payment was taken, no e-ticket or PNR exists, and no email has been sent.
+                No payment was taken, no e-ticket or PNR exists, and no email has been sent.
             </div>
 
             <div class="ota-confirm-grid">
@@ -50,6 +50,9 @@
                     <h2 class="ota-confirm-card__title"><i class="fa fa-plane"></i> Trip summary</h2>
                     @if ($o)
                         <div class="ota-confirm-trip">
+                            @if(!empty($airlineLogo))
+                                <p style="margin:0 0 0.5rem;"><img src="{{ $airlineLogo }}" alt="{{ $o['airline_name'] ?? 'Airline' }} logo" style="height:24px;width:auto;"></p>
+                            @endif
                             <p class="ota-confirm-trip__line">
                                 <strong>{{ $o['airline_name'] ?? '' }}</strong>
                                 <span class="ota-confirm-trip__fn">{{ $o['carrier_code'] ?? '' }}{{ $o['flight_number'] ?? '' }}</span>
@@ -108,9 +111,10 @@
             </div>
 
             <nav class="ota-confirm-actions" aria-label="What would you like to do next?">
+                <a href="{{ route('lookup-booking.form') }}" class="btn btn-default btn-lg ota-confirm-btn-secondary">View booking</a>
                 <a href="{{ route('flights.search') }}" class="btn btn-primary btn-lg ota-confirm-btn-primary">Book another flight</a>
                 <a href="{{ route('home') }}" class="btn btn-default btn-lg ota-confirm-btn-secondary">Back to home</a>
-                <a href="{{ route('support') }}" class="btn btn-default btn-lg ota-confirm-btn-admin">Get support</a>
+                <a href="{{ route('support') }}" class="btn btn-default btn-lg ota-confirm-btn-admin">Contact support</a>
             </nav>
         </div>
     </section>

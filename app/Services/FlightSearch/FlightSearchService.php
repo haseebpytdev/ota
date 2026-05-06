@@ -15,6 +15,7 @@ class FlightSearchService
     public function __construct(
         protected SupplierAdapterResolver $resolver,
         protected PricingRuleService $pricingRuleService,
+        protected FlightDeparturePolicy $departurePolicy,
     ) {}
 
     /**
@@ -94,6 +95,11 @@ class FlightSearchService
             }
         }
 
+        [$offers, $leadWarning] = $this->departurePolicy->filterOffersForLeadTime($criteria, $offers);
+        if ($leadWarning !== null) {
+            $warnings[] = $leadWarning;
+        }
+
         return [
             'offers' => $offers,
             'warnings' => array_values(array_unique($warnings)),
@@ -122,9 +128,10 @@ class FlightSearchService
             'duration_h' => intdiv($durationMinutes, 60),
             'duration_m' => $durationMinutes % 60,
             'baggage' => $baggageSummary,
-            'base_fare' => (float) ($fare['base_fare'] ?? 0),
-            'currency' => (string) ($fare['currency'] ?? 'PKR'),
+            'base_fare' => (float) ($pricing['base_fare'] ?? ($fare['base_fare'] ?? 0)),
+            'currency' => (string) ($pricing['pricing_currency'] ?? ($fare['currency'] ?? 'PKR')),
             'taxes' => (float) ($pricing['taxes'] ?? 0),
+            'supplier_total_source' => (float) ($pricing['supplier_total_source'] ?? (($fare['base_fare'] ?? 0) + ($fare['taxes'] ?? 0))),
             'markup' => (float) ($pricing['admin_markup'] ?? 0)
                 + (float) ($pricing['route_markup'] ?? 0)
                 + (float) ($pricing['airline_markup'] ?? 0)
@@ -132,6 +139,9 @@ class FlightSearchService
             'service_fee' => (float) ($pricing['service_fee'] ?? 0),
             'total' => (float) ($pricing['final_total'] ?? 0),
             'final_customer_price' => (float) ($pricing['final_total'] ?? 0),
+            'pricing_currency' => (string) ($pricing['pricing_currency'] ?? ($fare['currency'] ?? 'PKR')),
+            'supplier_currency' => (string) ($pricing['supplier_currency'] ?? ($fare['currency'] ?? 'PKR')),
+            'conversion_status' => (string) ($pricing['conversion_status'] ?? 'same_currency'),
             'applied_rules' => $pricing['applied_rules'] ?? [],
             'pricing_components' => $pricing,
         ]);

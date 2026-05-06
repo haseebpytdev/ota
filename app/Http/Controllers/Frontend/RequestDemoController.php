@@ -10,8 +10,8 @@ class RequestDemoController extends Controller
     public function __invoke(): View
     {
         return view('frontend.request-demo', [
-            'client' => config('demo-client', []),
-            'modules' => config('demo-request-demo.modules', []),
+            'client' => config('ota-client', []),
+            'modules' => config('ota-request.modules', []),
         ]);
     }
 }

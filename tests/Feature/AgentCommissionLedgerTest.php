@@ -86,7 +86,7 @@ class AgentCommissionLedgerTest extends TestCase
     public function test_agent_cannot_view_another_agent_commissions(): void
     {
         [$agentA] = $this->agentForAgency();
-        $agency = Agency::query()->where('slug', 'aurora-sky-travel')->firstOrFail();
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
         $otherUser = User::factory()->create(['account_type' => AccountType::Agent, 'current_agency_id' => $agency->id]);
         $agency->users()->attach($otherUser->id, ['role' => 'agent']);
         $agentB = Agent::factory()->create(['agency_id' => $agency->id, 'user_id' => $otherUser->id]);
@@ -112,7 +112,7 @@ class AgentCommissionLedgerTest extends TestCase
     public function test_staff_cannot_approve_or_payout(): void
     {
         [$agent] = $this->agentForAgency();
-        $staff = User::query()->where('email', 'staff@aurora-sky-travel.demo')->firstOrFail();
+        $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
         $entry = $this->pendingEntry($agent);
 
         $this->actingAs($staff)->post(route('admin.commissions.entries.approve', $entry))->assertForbidden();
@@ -193,8 +193,8 @@ class AgentCommissionLedgerTest extends TestCase
     protected function agentForAgency(): array
     {
         $this->seed(OtaFoundationSeeder::class);
-        $agency = Agency::query()->where('slug', 'aurora-sky-travel')->firstOrFail();
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $agent = Agent::query()->where('agency_id', $agency->id)->firstOrFail();
 
         return [$agent, $admin];
@@ -221,7 +221,7 @@ class AgentCommissionLedgerTest extends TestCase
     protected function ticketingReadyBooking(bool $withAgent, bool $withAgentRuleMeta = false): array
     {
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@aurora-sky-travel.demo')->firstOrFail();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $connection = SupplierConnection::query()->where('agency_id', $admin->current_agency_id)->where('provider', SupplierProvider::Mock)->firstOrFail();
         $agent = $withAgent ? Agent::query()->where('agency_id', $admin->current_agency_id)->firstOrFail() : null;
 
