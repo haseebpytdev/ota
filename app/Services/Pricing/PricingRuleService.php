@@ -1,0 +1,204 @@
+<?php
+
+namespace App\Services\Pricing;
+
+use App\Enums\MarkupRuleStatus;
+use App\Enums\MarkupRuleType;
+use App\Enums\MarkupValueType;
+use App\Models\Agency;
+use App\Models\MarkupRule;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
+
+class PricingRuleService
+{
+    public function __construct(
+        protected FlightPricingService $defaultPricing,
+    ) {}
+
+    /**
+     * @param  array<string, mixed>  $context
+     * @return Collection<int, MarkupRule>
+     */
+    public function getApplicableRules(Agency $agency, array $context): Collection
+    {
+        $now = now();
+
+        $rules = MarkupRule::query()
+            ->where('agency_id', $agency->id)
+            ->where('status', MarkupRuleStatus::Active->value)
+            ->where(function (Builder $q) use ($now): void {
+                $q->whereNull('starts_at')
+                    ->orWhere('starts_at', '<=', $now);
+            })
+            ->where(function (Builder $q) use ($now): void {
+                $q->whereNull('ends_at')
+                    ->orWhere('ends_at', '>=', $now);
+            })
+            ->orderBy('priority')
+            ->orderBy('id')
+            ->get();
+
+        return $rules->filter(fn (MarkupRule $rule): bool => $this->matchesRule($rule, $context))->values();
+    }
+
+    /**
+     * @param  array<string, mixed>  $supplierFare
+     * @param  array<string, mixed>  $context
+     * @return array<string, mixed>
+     */
+    public function calculateMarkup(Agency $agency, array $supplierFare, array $context): array
+    {
+        $priced = $this->defaultPricing->applyToOffers([$supplierFare])[0];
+        $rules = $this->getApplicableRules($agency, $context);
+
+        $baseFare = (float) ($priced['base_fare'] ?? 0);
+        $taxes = (float) ($priced['taxes'] ?? 0);
+        $supplierTotal = $baseFare + $taxes;
+
+        $components = [
+            'base_fare' => $baseFare,
+            'taxes' => $taxes,
+            'supplier_total' => $supplierTotal,
+            'admin_markup' => 0.0,
+            'route_markup' => 0.0,
+            'airline_markup' => 0.0,
+            'agent_markup_or_commission' => 0.0,
+            'service_fee' => 0.0,
+            'final_total' => 0.0,
+        ];
+
+        $applied = [];
+
+        if ($rules->isEmpty()) {
+            $components['admin_markup'] = (float) ($priced['markup'] ?? 0);
+            $components['service_fee'] = (float) ($priced['service_fee'] ?? 0);
+            $components['final_total'] = $supplierTotal + $components['admin_markup'] + $components['service_fee'];
+
+            return $components + [
+                'applied_rules' => [],
+            ];
+        }
+
+        foreach ($rules as $rule) {
+            $amount = $this->ruleAmount($rule, $supplierTotal);
+            if ($amount <= 0) {
+                continue;
+            }
+
+            $bucket = $this->resolveBucket($rule);
+            $components[$bucket] += $amount;
+
+            $applied[] = [
+                'id' => $rule->id,
+                'name' => $rule->name,
+                'rule_type' => $rule->rule_type->value,
+                'value' => (float) $rule->value,
+                'value_type' => $rule->value_type->value,
+                'amount' => round($amount, 2),
+                'bucket' => $bucket,
+            ];
+        }
+
+        $components['final_total'] = $supplierTotal
+            + $components['admin_markup']
+            + $components['route_markup']
+            + $components['airline_markup']
+            + $components['agent_markup_or_commission']
+            + $components['service_fee'];
+
+        return $components + [
+            'applied_rules' => $applied,
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $fare
+     * @param  array<string, mixed>  $context
+     * @return array<string, mixed>
+     */
+    public function applyRules(Agency $agency, array $fare, array $context): array
+    {
+        return $this->calculateMarkup($agency, $fare, $context);
+    }
+
+    /**
+     * @param  array<string, mixed>  $context
+     */
+    protected function matchesRule(MarkupRule $rule, array $context): bool
+    {
+        $appliesTo = $rule->applies_to ?? [];
+        if (! is_array($appliesTo)) {
+            return false;
+        }
+
+        return match ($rule->rule_type) {
+            MarkupRuleType::Global => true,
+            MarkupRuleType::Route => $this->valueInContext($appliesTo, 'route', $context['route'] ?? null),
+            MarkupRuleType::Airline => $this->valueInContext($appliesTo, 'airline', $context['airline'] ?? null),
+            MarkupRuleType::Supplier => $this->valueInContext($appliesTo, 'supplier', $context['supplier'] ?? null),
+            MarkupRuleType::Agent => $this->matchAgentRule($appliesTo, $context),
+            MarkupRuleType::Cabin => $this->valueInContext($appliesTo, 'cabin', $context['cabin'] ?? null),
+            MarkupRuleType::FareFamily => $this->valueInContext($appliesTo, 'fare_family', $context['fare_family'] ?? null),
+        };
+    }
+
+    /**
+     * @param  array<string, mixed>  $appliesTo
+     * @param  array<string, mixed>  $context
+     */
+    protected function matchAgentRule(array $appliesTo, array $context): bool
+    {
+        $sourceChannel = strtolower((string) ($context['source_channel'] ?? ''));
+        if (isset($appliesTo['source_channel']) && strtolower((string) $appliesTo['source_channel']) !== $sourceChannel) {
+            return false;
+        }
+
+        if (isset($appliesTo['agent_id'])) {
+            return (int) $appliesTo['agent_id'] === (int) ($context['agent_id'] ?? 0);
+        }
+
+        return true;
+    }
+
+    /**
+     * @param  array<string, mixed>  $appliesTo
+     */
+    protected function valueInContext(array $appliesTo, string $key, mixed $contextValue): bool
+    {
+        if (! isset($appliesTo[$key]) || $contextValue === null || $contextValue === '') {
+            return false;
+        }
+
+        $expected = strtolower((string) $appliesTo[$key]);
+        $actual = strtolower((string) $contextValue);
+
+        return $expected === $actual;
+    }
+
+    protected function ruleAmount(MarkupRule $rule, float $supplierTotal): float
+    {
+        $value = (float) ($rule->value ?? 0);
+
+        if ($rule->value_type === MarkupValueType::Percentage) {
+            return round(($supplierTotal * $value) / 100, 2);
+        }
+
+        return round($value, 2);
+    }
+
+    protected function resolveBucket(MarkupRule $rule): string
+    {
+        $bucket = strtolower((string) ($rule->meta['bucket'] ?? ''));
+        if (in_array($bucket, ['admin_markup', 'route_markup', 'airline_markup', 'agent_markup_or_commission', 'service_fee'], true)) {
+            return $bucket;
+        }
+
+        return match ($rule->rule_type) {
+            MarkupRuleType::Route => 'route_markup',
+            MarkupRuleType::Airline => 'airline_markup',
+            MarkupRuleType::Agent => 'agent_markup_or_commission',
+            default => 'admin_markup',
+        };
+    }
+}

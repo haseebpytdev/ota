@@ -1,0 +1,2469 @@
+/**
+ * Hayat OTA — public SaaS-style shell (overrides TourNest defaults).
+ */
+:root {
+  --ota-navy: #0a1628;
+  --ota-navy-mid: #111f3a;
+  --ota-blue: #2563eb;
+  --ota-blue-dark: #1d4ed8;
+  --ota-sky: #0ea5e9;
+  --ota-text: #0f172a;
+  --ota-muted: #64748b;
+  --ota-border: #e2e8f0;
+  --ota-card: #ffffff;
+  --ota-radius: 14px;
+  --ota-radius-sm: 10px;
+  --ota-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.07), 0 18px 42px -12px rgba(15, 23, 42, 0.18);
+  --ota-shadow-lg: 0 25px 50px -12px rgba(15, 23, 42, 0.28);
+  /* Main content rail + horizontal padding (no horizontal padding on .ota-section — gutters live here) */
+  --ota-max-content: 1180px;
+  --ota-gutter-x: 16px;
+  /* Fixed top trust bar + main nav — single offset for main content + inner sticky columns */
+  --ota-fixed-header-height: clamp(6.75rem, 11.5vh, 8.35rem);
+  --ota-header-offset: var(--ota-fixed-header-height);
+  --ota-nav-sticky-top: var(--ota-fixed-header-height);
+}
+
+/* Fixed public shell header (trust bar + nav) — avoids sticky/containing-block bugs on checkout */
+.ota-site-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1080;
+  background: var(--ota-navy);
+}
+.ota-site-main {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  padding-top: var(--ota-fixed-header-height);
+  box-sizing: border-box;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --ota-gutter-x: 24px;
+  }
+}
+
+/*
+  Public shell: Bootstrap 3 (14px body) loads before this file.
+  Use a comfortable 17px body baseline so 100% browser zoom reads like a modern product (≈ prior 125% zoom).
+*/
+html.ota-html {
+  font-size: 100%;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body.ota-public {
+  font-family: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--ota-text);
+  background: #f8fafc;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Inherit body size; Bootstrap’s global p/li sizes stay off our sections */
+body.ota-public p,
+body.ota-public li {
+  font-size: inherit;
+  line-height: inherit;
+}
+
+/* Bootstrap 3 `.container` on inner pages: align rail + gutters with homepage */
+body.ota-public .container {
+  max-width: var(--ota-max-content) !important;
+  padding-left: var(--ota-gutter-x);
+  padding-right: var(--ota-gutter-x);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+body.ota-public .top-area,
+body.ota-public header.top-area {
+  display: none !important;
+}
+
+/* —— Slim top bar —— */
+.ota-slim-topbar {
+  background: var(--ota-navy);
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+}
+.ota-slim-topbar-inner {
+  max-width: var(--ota-max-content);
+  margin: 0 auto;
+  padding: 0.5rem var(--ota-gutter-x);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.35rem 1.5rem;
+}
+.ota-slim-topbar span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.ota-slim-topbar .fa {
+  color: var(--ota-sky);
+  font-size: 0.7rem;
+}
+
+/* —— Main nav (inside fixed .ota-site-header) —— */
+.ota-main-nav {
+  position: relative;
+  z-index: 1;
+  background: #fff;
+  border-bottom: 1px solid var(--ota-border);
+  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04), 0 6px 20px rgba(15, 23, 42, 0.06);
+}
+.ota-nav-inner {
+  max-width: var(--ota-max-content);
+  margin: 0 auto;
+  padding: 0.75rem var(--ota-gutter-x);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.85rem;
+  position: relative;
+  min-height: 3.35rem;
+}
+.ota-brand {
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: var(--ota-navy) !important;
+  text-decoration: none !important;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+.ota-brand-with-mark {
+  display: flex !important;
+  align-items: center;
+  gap: 0.65rem;
+  white-space: normal;
+}
+.ota-brand-mark {
+  flex-shrink: 0;
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--ota-blue) 0%, #1e40af 100%);
+  color: #fff !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+}
+.ota-brand-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.2;
+}
+.ota-brand small {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ota-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-top: 0.15rem;
+}
+.ota-nav-toggle {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+.ota-burger {
+  display: none;
+  margin-left: auto;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--ota-border);
+  border-radius: var(--ota-radius-sm);
+  background: #fff;
+  cursor: pointer;
+  font-size: 1.1rem;
+  color: var(--ota-navy);
+}
+.ota-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 0.1rem;
+  margin-left: auto;
+  flex-wrap: wrap;
+}
+.ota-nav-links a {
+  color: var(--ota-muted) !important;
+  text-decoration: none !important;
+  font-weight: 600;
+  font-size: 15px;
+  padding: 0.55rem 0.85rem;
+  border-radius: 8px;
+  transition: color 0.15s, background 0.15s;
+}
+.ota-nav-links a:hover {
+  color: var(--ota-navy) !important;
+  background: #f1f5f9;
+}
+.ota-nav-cta-floating {
+  display: none;
+}
+@media (min-width: 992px) {
+  .ota-nav-cta-floating {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+  }
+  .ota-nav-cta-inmenu {
+    display: none !important;
+  }
+}
+.ota-nav-cta-inmenu {
+  margin-top: 0.35rem;
+  width: 100%;
+  justify-content: center;
+}
+.ota-nav-cta {
+  margin-left: 0.5rem;
+  padding: 0.65rem 1.35rem !important;
+  border-radius: 10px !important;
+  font-weight: 700 !important;
+  font-size: 15px !important;
+  background: linear-gradient(135deg, var(--ota-blue) 0%, var(--ota-blue-dark) 100%) !important;
+  color: #fff !important;
+  border: none !important;
+  text-decoration: none !important;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
+  white-space: nowrap;
+}
+.ota-nav-cta:hover {
+  filter: brightness(1.06);
+  color: #fff !important;
+}
+.ota-nav-dropdown {
+  position: relative;
+}
+.ota-nav-dropdown-toggle {
+  border: 0;
+  background: transparent;
+  color: var(--ota-muted);
+  font-weight: 600;
+  font-size: 15px;
+  padding: 0.55rem 0.85rem;
+  border-radius: 8px;
+}
+.ota-nav-dropdown-toggle:hover {
+  color: var(--ota-navy);
+  background: #f1f5f9;
+}
+.ota-nav-dropdown-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 180px;
+  background: #fff;
+  border: 1px solid var(--ota-border);
+  border-radius: 10px;
+  box-shadow: var(--ota-shadow);
+  z-index: 5;
+  padding: 0.35rem;
+}
+.ota-nav-dropdown:hover .ota-nav-dropdown-menu,
+.ota-nav-dropdown.is-open .ota-nav-dropdown-menu,
+.ota-nav-dropdown:focus-within .ota-nav-dropdown-menu {
+  display: block;
+}
+.ota-nav-dropdown-menu a {
+  display: block;
+  padding: 0.5rem 0.65rem;
+}
+.ota-nav-dropdown-title {
+  display: block;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--ota-navy);
+}
+.ota-nav-dropdown-meta {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.75rem;
+  color: var(--ota-muted);
+  font-weight: 500;
+}
+@media (max-width: 991px) {
+  .ota-burger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+  }
+  .ota-nav-links {
+    display: none;
+    width: 100%;
+    order: 10;
+    margin: 0.5rem 0 0;
+    padding: 0.75rem 0 0.25rem;
+    border-top: 1px solid var(--ota-border);
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .ota-nav-dropdown-menu {
+    position: static;
+    display: none;
+    box-shadow: none;
+    border: 0;
+    background: #f8fafc;
+    padding: 0.35rem 0.5rem;
+    border-radius: 8px;
+    margin-top: 0.35rem;
+  }
+  .ota-nav-dropdown-toggle {
+    width: 100%;
+    text-align: left;
+  }
+  .ota-nav-toggle:checked ~ .ota-nav-links {
+    display: flex;
+  }
+  .ota-nav-dropdown.is-open .ota-nav-dropdown-menu {
+    display: block;
+  }
+  .ota-nav-cta-floating {
+    display: none !important;
+  }
+}
+@media (min-width: 1200px) and (max-width: 1365px) {
+  .ota-nav-links a,
+  .ota-nav-dropdown-toggle {
+    padding-left: 0.65rem;
+    padding-right: 0.65rem;
+  }
+}
+
+/* —— Hero —— */
+.ota-hero {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #0c1929 0%, #132447 42%, #1a3a5c 100%);
+  color: #fff;
+  padding: 3.5rem 0 4rem;
+}
+@media (min-width: 992px) {
+  .ota-hero {
+    padding: 5.25rem 0 5.5rem;
+  }
+}
+.ota-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 70% 20%, rgba(14, 165, 233, 0.18), transparent 55%),
+    radial-gradient(ellipse 50% 40% at 10% 80%, rgba(37, 99, 235, 0.2), transparent 50%);
+  pointer-events: none;
+}
+.ota-hero-inner {
+  position: relative;
+  z-index: 1;
+  max-width: var(--ota-max-content);
+  margin: 0 auto;
+  padding: 0 var(--ota-gutter-x);
+  box-sizing: border-box;
+}
+.ota-hero h1 {
+  font-size: clamp(2.25rem, 4.2vw, 3rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.12;
+  margin: 0 0 1.1rem;
+  color: #fff !important;
+}
+@media (min-width: 992px) {
+  .ota-hero h1 {
+    font-size: clamp(2.625rem, 3.6vw, 3rem);
+  }
+}
+.ota-hero-lead {
+  font-size: 18px;
+  line-height: 1.62;
+  color: #cbd5e1 !important;
+  max-width: 38rem;
+  margin: 0 0 1.65rem;
+  font-weight: 500;
+}
+.ota-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-bottom: 0.5rem;
+}
+.ota-btn-white {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.8rem 1.35rem;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 16px;
+  background: #fff !important;
+  color: var(--ota-navy) !important;
+  border: none !important;
+  text-decoration: none !important;
+  box-shadow: var(--ota-shadow);
+}
+.ota-btn-white:hover {
+  background: #f8fafc !important;
+  color: var(--ota-navy) !important;
+}
+.ota-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.8rem 1.35rem;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 16px;
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #fff !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  text-decoration: none !important;
+}
+.ota-btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.18) !important;
+  color: #fff !important;
+}
+.ota-hero-help-hint {
+  margin: 0.85rem 0 0;
+  font-size: 14px;
+  color: rgba(226, 232, 240, 0.88);
+  font-weight: 500;
+}
+.ota-hero-help-hint a {
+  color: #fff !important;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.ota-hero-help-hint a:hover {
+  color: #e0f2fe !important;
+}
+.ota-hero-badge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 0.35rem 0.65rem;
+  border-radius: 6px;
+  background: rgba(14, 165, 233, 0.25);
+  color: #7dd3fc;
+  margin-bottom: 1rem;
+}
+
+.ota-hero-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2.25rem;
+  align-items: start;
+}
+@media (min-width: 992px) {
+  .ota-hero-grid {
+    grid-template-columns: minmax(0, 1.12fr) minmax(520px, 600px);
+    gap: 2.75rem;
+    align-items: stretch;
+  }
+}
+
+.ota-search-widget-section {
+  margin: 0;
+}
+
+/* —— Search card —— */
+.ota-search-card {
+  background: var(--ota-card);
+  border-radius: var(--ota-radius);
+  box-shadow: var(--ota-shadow-lg);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  padding: 1.875rem 1.875rem 1.65rem;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+@media (min-width: 992px) {
+  .ota-search-card {
+    max-width: 100%;
+  }
+}
+.ota-search-card-head {
+  margin-bottom: 1.15rem;
+}
+.ota-search-card-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--ota-navy);
+  margin: 0 0 0.4rem;
+  letter-spacing: -0.02em;
+}
+.ota-search-note {
+  font-size: 14px;
+  color: #475569;
+  line-height: 1.55;
+  margin: 0;
+  font-weight: 500;
+}
+.ota-search-card-head .ota-search-note {
+  max-width: 100%;
+}
+.ota-field-hint {
+  font-size: 12px !important;
+  color: #64748b !important;
+  line-height: 1.45 !important;
+  font-weight: 500 !important;
+  margin: 0.4rem 0 0 !important;
+}
+.ota-search-tabs {
+  display: flex;
+  gap: 0.35rem;
+  margin-bottom: 1.25rem;
+  padding: 0.25rem;
+  background: #f1f5f9;
+  border-radius: 10px;
+}
+.ota-search-tabs button,
+.ota-search-tabs .ota-tab {
+  flex: 1;
+  text-align: center;
+  padding: 0.55rem 0.4rem;
+  font-size: 13px;
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ota-muted);
+  cursor: default;
+}
+.ota-search-tabs .ota-tab-active {
+  background: #fff;
+  color: var(--ota-navy);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+.ota-search-tabs .ota-tab-muted {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.ota-field-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ota-muted);
+  margin-bottom: 0.4rem;
+}
+.ota-field {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 50px;
+  padding: 0.65rem 0.85rem;
+  font-size: 15px;
+  font-weight: 600;
+  border: 1px solid var(--ota-border);
+  border-radius: 10px;
+  color: var(--ota-navy);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.ota-field:focus {
+  outline: none;
+  border-color: var(--ota-blue);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+.ota-from-to-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 0.75rem;
+  align-items: end;
+  margin-bottom: 1rem;
+}
+@media (max-width: 575px) {
+  .ota-from-to-row {
+    grid-template-columns: 1fr;
+  }
+  .ota-swap-wrap {
+    justify-self: center;
+    order: 2;
+  }
+  .ota-from-wrap {
+    order: 1;
+  }
+  .ota-to-wrap {
+    order: 3;
+  }
+}
+.ota-swap-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  border: 1px solid var(--ota-border);
+  background: #f8fafc;
+  color: var(--ota-blue);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.15rem;
+  transition: background 0.15s;
+}
+.ota-swap-btn:hover {
+  background: #eff6ff;
+}
+.ota-search-grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+@media (max-width: 575px) {
+  .ota-search-grid2 {
+    grid-template-columns: 1fr;
+  }
+}
+.ota-search-submit {
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 0.5rem;
+  min-height: 54px;
+  padding: 0.85rem 1.15rem !important;
+  border-radius: 11px !important;
+  font-weight: 800 !important;
+  font-size: 17px !important;
+  letter-spacing: 0.02em;
+  border: none !important;
+  background: linear-gradient(135deg, var(--ota-blue) 0%, #1e40af 100%) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+}
+.ota-search-submit:hover {
+  filter: brightness(1.05);
+  color: #fff !important;
+}
+
+/* —— Feature cards —— */
+.ota-section {
+  padding: 3rem 0;
+}
+@media (min-width: 768px) {
+  .ota-section {
+    padding: 4.5rem 0;
+  }
+}
+/* Homepage + inner pages: single width rail (explicit; do not rely on TourNest wrappers) */
+.ota-container {
+  max-width: var(--ota-max-content);
+  margin: 0 auto;
+  width: 100%;
+  padding-left: var(--ota-gutter-x);
+  padding-right: var(--ota-gutter-x);
+  box-sizing: border-box;
+}
+.ota-container .ota-features-grid,
+.ota-container .ota-routes-grid {
+  max-width: none;
+  margin-left: 0;
+  margin-right: 0;
+}
+.ota-container .ota-why-grid {
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.ota-section-head {
+  text-align: center;
+  max-width: 38rem;
+  margin: 0 auto 1.75rem;
+}
+.ota-section-head--compact {
+  margin-bottom: 1.35rem;
+}
+.ota-section-kicker {
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ota-blue);
+  margin: 0 0 0.5rem;
+}
+.ota-section-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--ota-navy);
+  margin: 0 0 0.5rem;
+  line-height: 1.2;
+}
+@media (min-width: 768px) {
+  .ota-section-title {
+    font-size: 2rem;
+  }
+}
+.ota-section-desc {
+  font-size: 17px;
+  color: var(--ota-muted);
+  margin: 0;
+  line-height: 1.58;
+}
+
+/* —— Primary / secondary buttons (public) —— */
+.ota-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.7rem 1.25rem;
+  border-radius: var(--ota-radius-sm);
+  font-weight: 700;
+  font-size: 16px;
+  text-decoration: none !important;
+  border: 1px solid transparent;
+  transition: filter 0.15s, box-shadow 0.15s, border-color 0.15s, background 0.15s;
+  cursor: pointer;
+  text-align: center;
+}
+.ota-btn-primary {
+  background: linear-gradient(135deg, var(--ota-blue) 0%, var(--ota-blue-dark) 100%);
+  color: #fff !important;
+  border-color: var(--ota-blue-dark);
+  box-shadow: 0 2px 10px rgba(37, 99, 235, 0.35);
+}
+.ota-btn-primary:hover {
+  filter: brightness(1.05);
+  color: #fff !important;
+}
+
+/* —— Trust metrics band (below hero) —— */
+.ota-metrics-band {
+  background: #f1f5f9;
+  border-bottom: 1px solid var(--ota-border);
+  padding: 1.85rem 0 2.35rem;
+}
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+@media (min-width: 768px) {
+  .metric-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.15rem;
+  }
+}
+.metric-card {
+  background: var(--ota-card);
+  border: 1px solid var(--ota-border);
+  border-radius: var(--ota-radius);
+  box-shadow: var(--ota-shadow);
+  padding: 1.45rem 1.15rem 1.4rem;
+  min-height: 7.5rem;
+  text-align: center;
+  transition: box-shadow 0.2s, border-color 0.2s, transform 0.2s;
+}
+.metric-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 10px 28px -12px rgba(15, 23, 42, 0.18);
+  transform: translateY(-1px);
+}
+.metric-card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  margin: 0 auto 0.65rem;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #eff6ff, #e0f2fe);
+  color: var(--ota-blue);
+  font-size: 1rem;
+}
+.metric-card-value {
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: var(--ota-navy);
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  margin-bottom: 0.35rem;
+}
+.metric-card-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ota-muted);
+  line-height: 1.45;
+}
+.metric-card-badge {
+  display: inline-block;
+  margin-left: 0.25rem;
+  padding: 0.12rem 0.4rem;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: #f1f5f9;
+  color: var(--ota-muted);
+  vertical-align: middle;
+}
+
+/* —— Home: sample fares —— */
+.ota-home-fares {
+  background: #fff;
+  border-top: 1px solid var(--ota-border);
+}
+.fare-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.15rem;
+}
+@media (min-width: 576px) {
+  .fare-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (min-width: 992px) {
+  .fare-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+  }
+}
+.fare-card {
+  background: var(--ota-card);
+  border: 1px solid var(--ota-border);
+  border-radius: var(--ota-radius);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+  padding: 1.45rem 1.35rem 1.35rem;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  transition: box-shadow 0.2s, border-color 0.2s, transform 0.2s;
+}
+.fare-card:hover {
+  border-color: rgba(37, 99, 235, 0.35);
+  box-shadow: var(--ota-shadow);
+  transform: translateY(-2px);
+}
+.fare-route {
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ota-blue);
+  margin-bottom: 0.5rem;
+}
+.fare-airline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.5rem;
+  margin-bottom: 0.85rem;
+}
+.fare-code {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--ota-navy);
+  padding: 0.15rem 0.45rem;
+  border-radius: 6px;
+  background: #f1f5f9;
+  border: 1px solid var(--ota-border);
+}
+.fare-airline-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ota-navy);
+}
+.fare-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin-bottom: 1rem;
+  font-size: 15px;
+  color: var(--ota-muted);
+}
+.fare-bag .fa {
+  color: var(--ota-blue);
+  margin-right: 0.25rem;
+}
+.ota-pill {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.ota-pill-ok {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+.ota-pill-warn {
+  background: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+.fare-price {
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: var(--ota-navy);
+  letter-spacing: -0.03em;
+  margin-top: auto;
+}
+.fare-note {
+  font-size: 14px;
+  color: var(--ota-muted);
+  margin: 0.35rem 0 1rem;
+  line-height: 1.45;
+}
+.fare-btn {
+  width: 100%;
+  padding: 0.7rem 1rem !important;
+}
+.fares-more {
+  text-align: center;
+  margin: 1.35rem 0 0;
+}
+.fares-more-link {
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--ota-blue) !important;
+  text-decoration: none !important;
+}
+.fares-more-link:hover {
+  text-decoration: underline !important;
+  color: var(--ota-blue-dark) !important;
+}
+
+/* —— Home: admin preview strip —— */
+.ota-home-admin-preview {
+  background: linear-gradient(180deg, #f8fafc 0%, #fff 100%);
+  border-top: 1px solid var(--ota-border);
+}
+.operator-preview-shell {
+  background: var(--ota-card);
+  border: 1px solid var(--ota-border);
+  border-radius: var(--ota-radius);
+  box-shadow: var(--ota-shadow);
+  padding: 1.5rem 1.25rem 1.35rem;
+}
+@media (min-width: 768px) {
+  .operator-preview-shell {
+    padding: 1.75rem 1.65rem 1.5rem;
+  }
+}
+.operator-preview-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.85rem;
+}
+@media (min-width: 576px) {
+  .operator-preview-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+}
+@media (min-width: 992px) {
+  .operator-preview-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+  }
+}
+.operator-preview-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  padding: 1.2rem 1.1rem;
+  background: #f8fafc;
+  border: 1px solid var(--ota-border);
+  border-radius: var(--ota-radius-sm);
+  text-decoration: none !important;
+  color: var(--ota-navy) !important;
+  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+  min-height: 100%;
+  cursor: pointer;
+}
+.operator-preview-card:hover {
+  background: #fff;
+  border-color: var(--ota-blue);
+  box-shadow: 0 6px 20px -8px rgba(37, 99, 235, 0.25);
+  color: var(--ota-navy) !important;
+  transform: translateY(-1px);
+}
+.operator-preview-card-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #eff6ff, #e0f2fe);
+  color: var(--ota-blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  margin-bottom: 0.75rem;
+  flex-shrink: 0;
+}
+.operator-preview-card-title {
+  font-size: 1.0625rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.35rem;
+}
+.operator-preview-card-desc {
+  font-size: 14px;
+  color: var(--ota-muted);
+  line-height: 1.45;
+  font-weight: 500;
+}
+.operator-preview-cta {
+  margin-top: 1.25rem;
+  padding-top: 1.15rem;
+  border-top: 1px solid var(--ota-border);
+  text-align: center;
+}
+.operator-preview-cta-btn {
+  min-width: 14rem;
+  padding: 0.75rem 1.5rem !important;
+}
+
+/* —— Home: white-label block —— */
+.ota-home-whitelabel {
+  background: #fff;
+  border-top: 1px solid var(--ota-border);
+}
+.white-label-card {
+  background: linear-gradient(135deg, #f8fafc 0%, #fff 55%);
+  border: 1px solid var(--ota-border);
+  border-radius: var(--ota-radius);
+  box-shadow: var(--ota-shadow);
+  padding: 1.5rem 1.25rem;
+}
+@media (min-width: 768px) {
+  .white-label-card {
+    padding: 2rem 2rem;
+  }
+}
+.white-label-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.75rem;
+  align-items: start;
+}
+@media (min-width: 992px) {
+  .white-label-layout {
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: 2.5rem;
+    align-items: stretch;
+  }
+}
+.white-label-main .ota-section-kicker {
+  text-align: left;
+}
+.white-label-title {
+  font-size: 1.55rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--ota-navy);
+  margin: 0 0 0.75rem;
+  line-height: 1.2;
+  text-align: left;
+}
+@media (min-width: 768px) {
+  .white-label-title {
+    font-size: 1.75rem;
+  }
+}
+.white-label-lead {
+  font-size: 17px;
+  color: var(--ota-muted);
+  line-height: 1.6;
+  margin: 0 0 1.1rem;
+  text-align: left;
+  max-width: 36rem;
+}
+.white-label-bullets {
+  list-style: none;
+  margin: 0 0 1.35rem;
+  padding: 0;
+}
+.white-label-bullets li {
+  position: relative;
+  padding-left: 1.65rem;
+  margin-bottom: 0.65rem;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ota-text);
+  line-height: 1.5;
+}
+.white-label-bullets li:last-child {
+  margin-bottom: 0;
+}
+.white-label-bullets .fa {
+  position: absolute;
+  left: 0;
+  top: 0.2rem;
+  color: var(--ota-blue);
+  font-size: 0.9rem;
+}
+.white-label-bullets code {
+  font-size: 0.88em;
+  background: #f1f5f9;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  border: 1px solid var(--ota-border);
+}
+.white-label-cta {
+  display: inline-flex;
+}
+.white-label-panel {
+  background: var(--ota-card);
+  border: 1px solid var(--ota-border);
+  border-radius: var(--ota-radius-sm);
+  padding: 1.25rem 1.2rem;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+}
+.white-label-panel-head {
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ota-muted);
+  margin: 0 0 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--ota-border);
+}
+.white-label-dl {
+  margin: 0;
+  padding: 0;
+}
+.white-label-dl dt {
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ota-muted);
+  margin: 0 0 0.2rem;
+}
+.white-label-dl dd {
+  margin: 0 0 0.85rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ota-navy);
+  line-height: 1.4;
+  word-break: break-word;
+}
+.white-label-dl dd:last-of-type {
+  margin-bottom: 0;
+}
+.white-label-dd-color {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.white-label-dd-muted {
+  font-weight: 500 !important;
+  color: var(--ota-muted) !important;
+  font-size: 0.875rem !important;
+  line-height: 1.5 !important;
+}
+.ota-color-swatch {
+  display: inline-block;
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 6px;
+  border: 1px solid var(--ota-border);
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+.ota-powered-by {
+  margin: 1rem 0 0;
+  font-size: 0.78rem;
+  color: var(--ota-muted);
+  font-weight: 600;
+}
+.ota-powered-by--panel {
+  margin-top: 1.1rem;
+  padding-top: 0.85rem;
+  border-top: 1px dashed var(--ota-border);
+  font-style: italic;
+}
+
+.ota-features-grid {
+  max-width: var(--ota-max-content);
+  margin-left: auto;
+  margin-right: auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+}
+@media (max-width: 991px) {
+  .ota-features-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 575px) {
+  .ota-features-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.ota-feature-card {
+  background: #fff;
+  border: 1px solid var(--ota-border);
+  border-radius: var(--ota-radius);
+  padding: 1.55rem 1.35rem;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  height: 100%;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+.ota-feature-card:hover {
+  box-shadow: var(--ota-shadow);
+  border-color: #cbd5e1;
+}
+.ota-feature-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 11px;
+  background: linear-gradient(135deg, #eff6ff, #e0f2fe);
+  color: var(--ota-blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  margin-bottom: 1rem;
+}
+.ota-feature-card h3 {
+  font-size: 1.0625rem;
+  font-weight: 800;
+  margin: 0 0 0.5rem;
+  color: var(--ota-navy);
+  letter-spacing: -0.02em;
+}
+.ota-feature-card p {
+  font-size: 15px;
+  color: var(--ota-muted);
+  line-height: 1.58;
+  margin: 0;
+}
+
+/* —— Why section band —— */
+.ota-why-section {
+  background: #fff;
+  border-top: 1px solid var(--ota-border);
+}
+
+/* —— Popular routes —— */
+.ota-routes-section {
+  background: #f1f5f9;
+  border-top: 1px solid var(--ota-border);
+  border-bottom: 1px solid var(--ota-border);
+}
+.ota-routes-grid {
+  max-width: var(--ota-max-content);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.85rem;
+}
+@media (max-width: 991px) {
+  .ota-routes-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 575px) {
+  .ota-routes-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.ota-route-card {
+  display: block;
+  background: #fff;
+  border: 1px solid var(--ota-border);
+  border-radius: var(--ota-radius-sm);
+  padding: 1rem 1rem;
+  text-decoration: none !important;
+  color: var(--ota-navy) !important;
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+.ota-route-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--ota-shadow);
+  border-color: var(--ota-blue);
+  color: var(--ota-navy) !important;
+}
+.ota-route-card strong {
+  display: block;
+  font-size: 0.97rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.ota-route-card span {
+  font-size: 0.8125rem;
+  color: var(--ota-muted);
+  font-weight: 600;
+}
+
+/* —— Why section —— */
+.ota-why-grid {
+  max-width: 900px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+@media (max-width: 767px) {
+  .ota-why-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.ota-why-item {
+  display: flex;
+  gap: 0.85rem;
+  align-items: flex-start;
+  padding: 1rem 1.1rem;
+  background: #fff;
+  border: 1px solid var(--ota-border);
+  border-radius: var(--ota-radius-sm);
+}
+.ota-why-item .fa {
+  color: var(--ota-blue);
+  margin-top: 0.15rem;
+}
+.ota-why-item h4 {
+  margin: 0 0 0.25rem;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--ota-navy);
+}
+.ota-why-item p {
+  margin: 0;
+  font-size: 15px;
+  color: var(--ota-muted);
+  line-height: 1.55;
+}
+
+/* —— Slim contact strip —— */
+.ota-contact-strip {
+  background: var(--ota-navy);
+  color: #94a3b8;
+  padding: 1rem;
+  text-align: center;
+  font-size: 0.9rem;
+}
+.ota-contact-strip a {
+  color: #e2e8f0 !important;
+  font-weight: 700;
+  margin: 0 0.5rem;
+  text-decoration: none !important;
+}
+.ota-contact-strip a:hover {
+  color: #fff !important;
+}
+
+/* —— Footer —— */
+body.ota-public footer.footer-copyright {
+  margin: 0;
+  padding: 0 !important;
+  background: #0c1424 !important;
+  border: none !important;
+  border-top: 1px solid rgba(148, 163, 184, 0.12) !important;
+}
+body.ota-public footer.footer-copyright .container {
+  max-width: var(--ota-max-content) !important;
+  width: 100% !important;
+  padding: 0 !important;
+}
+body.ota-public footer.footer-copyright .footer-content,
+body.ota-public footer.footer-copyright .foot-icons,
+body.ota-public footer.footer-copyright hr {
+  display: none !important;
+}
+.ota-footer {
+  padding: 1.75rem 1rem 1.1rem;
+  color: #94a3b8;
+  font-size: max(0.875rem, 13px);
+}
+.ota-footer-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr 1fr;
+  gap: 1.5rem 2rem;
+  margin-bottom: 1.5rem;
+}
+@media (max-width: 767px) {
+  .ota-footer-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 479px) {
+  .ota-footer-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.ota-footer h4 {
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #64748b;
+  margin: 0 0 0.75rem;
+}
+.ota-footer a {
+  color: #cbd5e1 !important;
+  text-decoration: none !important;
+  display: block;
+  margin-bottom: 0.4rem;
+  font-weight: 500;
+}
+.ota-footer a:hover {
+  color: #fff !important;
+}
+.ota-footer-brand strong {
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 800;
+  display: block;
+  margin-bottom: 0.35rem;
+}
+.ota-footer-bar {
+  border-top: 1px solid rgba(148, 163, 184, 0.15);
+  padding-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 13px;
+  color: #64748b;
+}
+body.ota-public #scroll-Top {
+  display: none !important;
+}
+
+/* —— Inner pages: offset lives on .ota-site-main; keep light top padding only —— */
+body.ota-public .ota-results-wrap,
+body.ota-public .ota-book-wrap,
+body.ota-public .ota-rev-wrap,
+body.ota-public .ota-confirmation-wrap,
+body.ota-public .travel-box,
+body.ota-public .ota-results-pro,
+body.ota-public .ota-flight-detail-wrap {
+  margin-top: 0 !important;
+  padding-top: 0.5rem;
+}
+body.ota-public .ota-flight-search-wrap {
+  padding-bottom: 3rem;
+}
+body.ota-public .ota-flight-detail-wrap {
+  padding-bottom: 4rem;
+}
+
+/* Booking checkout (passenger / review) — keep markup in Blade; styles live here */
+body.ota-public .ota-book-wrap {
+  padding-bottom: 5rem;
+  background: #f1f5f9;
+  min-height: 72vh;
+}
+
+body.ota-public .ota-checkout-page {
+  padding-bottom: 4rem;
+}
+body.ota-public .ota-checkout-page-head {
+  max-width: 42rem;
+  margin-bottom: 1.75rem;
+}
+body.ota-public .ota-checkout-page-head--flush {
+  max-width: none;
+}
+body.ota-public .ota-flow-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #1d4ed8;
+  background: #dbeafe;
+  border: 1px solid #93c5fd;
+  border-radius: 999px;
+  padding: 0.22rem 0.55rem;
+}
+body.ota-public .ota-checkout-accounts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+@media (max-width: 600px) {
+  body.ota-public .ota-checkout-accounts {
+    grid-template-columns: 1fr;
+  }
+}
+body.ota-public .ota-checkout-account-card {
+  position: relative;
+  background: #fff;
+  border: 1px solid var(--ota-border);
+  border-radius: var(--ota-radius);
+  padding: 1.35rem 1.15rem 1.15rem;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+}
+body.ota-public .ota-checkout-account-card .ota-badge-coming {
+  top: 0.75rem;
+  right: 0.75rem;
+}
+body.ota-public .ota-checkout-account-card__title {
+  margin: 0 0 0.35rem;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--ota-navy);
+}
+body.ota-public .ota-checkout-account-card__text {
+  margin: 0 0 0.85rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: #64748b;
+}
+body.ota-public .ota-btn-account {
+  display: inline-block;
+  width: 100%;
+  text-align: center;
+  padding: 0.55rem 0.85rem;
+  font-weight: 700;
+  font-size: 0.9rem;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #64748b;
+  cursor: not-allowed;
+}
+body.ota-public .ota-btn-account:disabled {
+  opacity: 0.85;
+}
+body.ota-public .ota-checkout-summary-route {
+  margin: 0 0 0.25rem;
+  font-size: 1.05rem;
+  color: var(--ota-navy);
+}
+body.ota-public .ota-checkout-summary-airline {
+  margin: 0;
+  font-size: 0.92rem;
+  color: #64748b;
+}
+body.ota-public .ota-checkout-pay-note {
+  margin: 1rem 0 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--ota-border);
+  font-size: 0.85rem;
+  color: #64748b;
+  line-height: 1.45;
+}
+body.ota-public .ota-checkout-pay-note .fa {
+  margin-right: 0.35rem;
+  color: #2563eb;
+}
+body.ota-public .ota-refund-pill {
+  font-size: 0.7rem !important;
+  font-weight: 700;
+  margin-left: 0.35rem;
+  vertical-align: middle;
+}
+body.ota-public .ota-direct-pill {
+  font-size: 0.7rem !important;
+  font-weight: 700;
+}
+body.ota-public .ota-checkout-sticky-summary {
+  max-height: calc(100vh - var(--ota-fixed-header-height) - 2rem);
+  overflow: auto;
+}
+body.ota-public .ota-checkout-page-kicker {
+  margin: 0 0 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #64748b;
+}
+body.ota-public .ota-checkout-page-title {
+  margin: 0 0 0.5rem;
+  font-size: clamp(1.5rem, 2.5vw, 1.85rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--ota-navy);
+}
+body.ota-public .ota-checkout-page-lead {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.55;
+  color: #475569;
+}
+
+body.ota-public .ota-checkout-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 65%) minmax(260px, 35%);
+  gap: 1.75rem;
+  align-items: start;
+}
+@media (max-width: 991px) {
+  body.ota-public .ota-checkout-grid {
+    grid-template-columns: 1fr;
+  }
+  body.ota-public .ota-checkout-aside {
+    position: static !important;
+  }
+}
+body.ota-public .ota-checkout-main {
+  min-width: 0;
+}
+body.ota-public .ota-checkout-aside {
+  position: sticky;
+  top: calc(var(--ota-nav-sticky-top) + 0.5rem);
+}
+
+body.ota-public .ota-checkout-card {
+  background: #fff;
+  border: 1px solid var(--ota-border);
+  border-radius: var(--ota-radius);
+  padding: 1.35rem 1.5rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+body.ota-public .ota-checkout-card--accent {
+  border-color: rgba(37, 99, 235, 0.22);
+  box-shadow: 0 4px 20px -8px rgba(15, 23, 42, 0.12);
+}
+body.ota-public .ota-checkout-card--muted {
+  background: #f8fafc;
+}
+body.ota-public .ota-checkout-card--soon {
+  position: relative;
+  padding-top: 2.25rem;
+}
+body.ota-public .ota-badge-coming {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #64748b;
+  background: #f1f5f9;
+  border: 1px solid var(--ota-border);
+  border-radius: 999px;
+  padding: 0.2rem 0.55rem;
+}
+body.ota-public .ota-checkout-card__head {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+body.ota-public .ota-checkout-card__icon {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(145deg, #eff6ff, #dbeafe);
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #2563eb;
+  font-size: 1.1rem;
+}
+body.ota-public .ota-checkout-card__title {
+  margin: 0 0 0.35rem;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--ota-navy);
+}
+body.ota-public .ota-checkout-aside-title {
+  margin: 0 0 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #64748b;
+}
+body.ota-public .ota-checkout-card__text {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #64748b;
+}
+body.ota-public .ota-checkout-section-title {
+  margin: 0 0 0.35rem;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--ota-navy);
+}
+body.ota-public .ota-checkout-section-hint {
+  margin: 0 0 1.1rem;
+  font-size: 0.875rem;
+  color: #64748b;
+}
+body.ota-public .ota-checkout-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+@media (max-width: 600px) {
+  body.ota-public .ota-checkout-row-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+body.ota-public .ota-checkout-form .ota-form-group {
+  margin-bottom: 1.1rem;
+}
+body.ota-public .ota-label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #334155;
+}
+body.ota-public select.ota-input,
+body.ota-public input.ota-input,
+body.ota-public textarea.ota-input {
+  min-height: 48px;
+  border-radius: 10px;
+  border-color: #cbd5e1;
+  box-shadow: none;
+  font-size: 15px;
+  padding: 0.55rem 0.85rem;
+}
+body.ota-public select.ota-input:focus,
+body.ota-public input.ota-input:focus,
+body.ota-public textarea.ota-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+}
+
+body.ota-public .ota-btn-ghost {
+  margin-top: 0.75rem;
+  display: inline-block;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #64748b;
+  background: #f8fafc;
+  border: 1px solid var(--ota-border);
+  border-radius: 8px;
+}
+body.ota-public .ota-btn-ghost:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+body.ota-public .ota-btn-primary-lg {
+  margin-top: 0.25rem;
+  min-height: 50px;
+  font-weight: 800;
+  font-size: 1rem;
+  letter-spacing: 0.01em;
+  border-radius: 12px;
+  background: #2563eb !important;
+  border-color: #1d4ed8 !important;
+  color: #fff !important;
+  box-shadow: 0 4px 14px -4px rgba(37, 99, 235, 0.55);
+}
+body.ota-public .ota-btn-primary-lg:hover,
+body.ota-public .ota-btn-primary-lg:focus {
+  background: #1d4ed8 !important;
+  border-color: #1e40af !important;
+  color: #fff !important;
+}
+
+body.ota-public .ota-checkout-flight-compact__line {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+body.ota-public .ota-checkout-flight-compact__airline {
+  font-weight: 800;
+  color: var(--ota-navy);
+}
+body.ota-public .ota-checkout-flight-compact__no {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #64748b;
+}
+body.ota-public .ota-checkout-flight-compact__route {
+  margin: 0 0 0.65rem;
+  font-size: 0.9rem;
+  color: #64748b;
+}
+body.ota-public .ota-checkout-flight-compact__times {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: var(--ota-navy);
+  margin-bottom: 0.5rem;
+}
+body.ota-public .ota-checkout-flight-compact__dur {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+}
+body.ota-public .ota-checkout-flight-compact__meta {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+body.ota-public .ota-checkout-fare-est {
+  margin-top: 1.1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--ota-border);
+}
+body.ota-public .ota-checkout-fare-est__label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #64748b;
+  margin-bottom: 0.2rem;
+}
+body.ota-public .ota-checkout-fare-est__total {
+  display: block;
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: var(--ota-navy);
+  letter-spacing: -0.02em;
+}
+body.ota-public .ota-checkout-fare-est__sub {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.78rem;
+  color: #94a3b8;
+  line-height: 1.4;
+}
+
+body.ota-public .ota-checkout-note .ota-checkout-aside-title {
+  color: var(--ota-navy);
+}
+body.ota-public .ota-btn-wa {
+  margin-top: 0.75rem;
+  min-height: 46px;
+  font-weight: 800;
+  border-radius: 10px;
+  background: #25d366 !important;
+  border-color: #1ebe57 !important;
+  color: #fff !important;
+}
+body.ota-public .ota-btn-wa:hover {
+  background: #1ebe57 !important;
+  color: #fff !important;
+}
+body.ota-public .ota-checkout-wa-phone {
+  margin: 0.65rem 0 0;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+body.ota-public .ota-review-flight__brand {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+body.ota-public .ota-review-flight__brand .ota-airline-logo {
+  margin: 0;
+  flex-shrink: 0;
+}
+body.ota-public .ota-review-flight__route {
+  font-size: 0.95rem;
+  color: #64748b;
+  margin-bottom: 0.75rem;
+}
+body.ota-public .ota-review-pax__name {
+  margin: 0 0 0.65rem;
+  font-size: 1.05rem;
+  color: var(--ota-navy);
+}
+body.ota-public .ota-review-pax__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+body.ota-public .ota-review-pax__list li {
+  margin-bottom: 0.4rem;
+  font-size: 0.95rem;
+  color: #475569;
+}
+body.ota-public .ota-review-pax__list li i {
+  width: 1.25rem;
+  color: #94a3b8;
+}
+
+body.ota-public .ota-fare-dl {
+  margin: 0;
+}
+body.ota-public .ota-fare-dl__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 0.9rem;
+}
+body.ota-public .ota-fare-dl__row dt {
+  margin: 0;
+  font-weight: 500;
+  color: #64748b;
+}
+body.ota-public .ota-fare-dl__row dd {
+  margin: 0;
+  font-weight: 700;
+  color: var(--ota-navy);
+}
+body.ota-public .ota-fare-dl__row--total {
+  border-bottom: none;
+  padding-top: 0.65rem;
+  margin-top: 0.25rem;
+  border-top: 2px solid #e2e8f0;
+  font-size: 1.05rem;
+}
+body.ota-public .ota-fare-dl__row--total dt {
+  font-weight: 800;
+  color: var(--ota-navy);
+}
+body.ota-public .ota-fare-dl__row--total dd {
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+body.ota-public .ota-method-card {
+  display: block;
+  position: relative;
+  margin-bottom: 0.65rem;
+  cursor: pointer;
+}
+body.ota-public .ota-method-card__input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+}
+body.ota-public .ota-method-card__body {
+  position: relative;
+  display: block;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.95rem 1rem 0.95rem 2.6rem;
+  background: #fafbfc;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+body.ota-public .ota-method-card__body::before {
+  content: '';
+  position: absolute;
+  left: 0.85rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  border: 2px solid #cbd5e1;
+  border-radius: 50%;
+  background: #fff;
+  margin-top: 0;
+}
+body.ota-public .ota-method-card__input:checked + .ota-method-card__body {
+  border-color: #2563eb;
+  background: #eff6ff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+body.ota-public .ota-method-card__input:checked + .ota-method-card__body::before {
+  border-color: #2563eb;
+  background: radial-gradient(circle, #2563eb 0%, #2563eb 45%, #fff 48%, #fff 100%);
+}
+body.ota-public .ota-method-card:focus-within .ota-method-card__body {
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+}
+body.ota-public .ota-method-card__title {
+  display: block;
+  font-weight: 800;
+  font-size: 0.92rem;
+  color: var(--ota-navy);
+}
+body.ota-public .ota-method-card__hint {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.78rem;
+  color: #64748b;
+  line-height: 1.35;
+}
+
+body.ota-public .ota-checkout-disclaimer {
+  margin: 0.85rem 0 0;
+  text-align: center;
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+body.ota-public .ota-rev-wrap {
+  width: 100%;
+  max-width: none;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 3rem;
+  padding-left: 0;
+  padding-right: 0;
+  padding-bottom: 2rem;
+  background: #f1f5f9;
+  min-height: 72vh;
+  padding-top: 0.5rem;
+}
+body.ota-public .ota-rev-card {
+  background: #fff;
+  border: 1px solid var(--ota-border);
+  border-radius: var(--ota-radius);
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+}
+body.ota-public .ota-rev-h {
+  font-weight: 800;
+  font-size: 1.35rem;
+  margin: 0 0 1rem;
+  color: var(--ota-navy);
+}
+
+/* —— Booking confirmation (premium OTA) —— */
+body.ota-public .ota-confirmation-page {
+  padding-bottom: 4.5rem;
+  background: #f1f5f9;
+  min-height: 72vh;
+}
+body.ota-public .ota-confirm-hero-card {
+  text-align: center;
+  max-width: 44rem;
+  margin: 0 auto 1.75rem;
+  background: #fff;
+  border: 1px solid var(--ota-border);
+  border-radius: var(--ota-radius);
+  padding: 2rem 1.5rem 1.75rem;
+  box-shadow: 0 4px 28px rgba(15, 23, 42, 0.08);
+}
+body.ota-public .ota-confirm-success-ring {
+  width: 88px;
+  height: 88px;
+  margin: 0 auto 1.25rem;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #ecfdf5, #d1fae5);
+  border: 3px solid #34d399;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 40px -12px rgba(16, 185, 129, 0.45);
+}
+body.ota-public .ota-confirm-success-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #10b981;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+body.ota-public .ota-confirm-title {
+  margin: 0 0 0.5rem;
+  font-size: clamp(1.55rem, 3vw, 2rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--ota-navy);
+}
+body.ota-public .ota-confirm-sub {
+  margin: 0 0 1.5rem;
+  font-size: 1.05rem;
+  line-height: 1.55;
+  color: #64748b;
+}
+body.ota-public .ota-confirm-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem 1rem;
+}
+body.ota-public .ota-confirm-ref {
+  text-align: left;
+  background: #fff;
+  border: 1px solid var(--ota-border);
+  border-radius: 12px;
+  padding: 0.85rem 1.15rem;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+body.ota-public .ota-confirm-ref__label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #64748b;
+  margin-bottom: 0.2rem;
+}
+body.ota-public .ota-confirm-ref__value {
+  display: block;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--ota-navy);
+  letter-spacing: 0.04em;
+}
+body.ota-public .ota-confirm-ref__hint {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  max-width: 16rem;
+}
+body.ota-public .ota-confirm-status {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #b45309;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: 999px;
+  padding: 0.35rem 0.85rem;
+}
+body.ota-public .ota-confirm-banner {
+  max-width: 52rem;
+  margin: 0 auto 1.75rem;
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  border: 1px solid #bfdbfe;
+  background: linear-gradient(135deg, #eff6ff 0%, #f8fafc 100%);
+  color: #1e3a5f;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+body.ota-public .ota-confirm-banner strong {
+  color: #1d4ed8;
+}
+body.ota-public .ota-confirm-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem 1.25rem;
+  max-width: 52rem;
+  margin: 0 auto 2rem;
+}
+@media (max-width: 767px) {
+  body.ota-public .ota-confirm-grid {
+    grid-template-columns: 1fr;
+  }
+}
+body.ota-public .ota-confirm-card {
+  background: #fff;
+  border: 1px solid var(--ota-border);
+  border-radius: var(--ota-radius);
+  padding: 1.25rem 1.35rem;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+body.ota-public .ota-confirm-card__title {
+  margin: 0 0 1rem;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--ota-navy);
+}
+body.ota-public .ota-confirm-card__title .fa {
+  margin-right: 0.45rem;
+  color: #2563eb;
+  opacity: 0.9;
+}
+body.ota-public .ota-confirm-card__text {
+  margin: 0 0 0.35rem;
+  color: var(--ota-navy);
+}
+body.ota-public .ota-confirm-card__muted {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+body.ota-public .ota-confirm-trip__line {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.35rem;
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+  color: var(--ota-navy);
+}
+body.ota-public .ota-confirm-trip__fn {
+  font-weight: 700;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+body.ota-public .ota-confirm-trip__route {
+  margin: 0 0 0.35rem;
+  color: #475569;
+  font-size: 0.92rem;
+}
+body.ota-public .ota-confirm-trip__times {
+  margin: 0 0 0.35rem;
+  font-weight: 700;
+  color: var(--ota-navy);
+}
+body.ota-public .ota-confirm-trip__meta {
+  margin: 0;
+}
+body.ota-public .ota-confirm-pax-name {
+  margin: 0 0 0.65rem;
+  font-size: 1.05rem;
+  color: var(--ota-navy);
+}
+body.ota-public .ota-confirm-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+body.ota-public .ota-confirm-list li {
+  margin-bottom: 0.4rem;
+  font-size: 0.92rem;
+  color: #475569;
+}
+body.ota-public .ota-confirm-list__k {
+  display: inline-block;
+  min-width: 4.5rem;
+  font-weight: 700;
+  color: #64748b;
+}
+body.ota-public .ota-confirm-method {
+  margin: 0 0 0.5rem;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--ota-navy);
+}
+body.ota-public .ota-confirm-steps {
+  margin: 0;
+  padding-left: 1.15rem;
+  color: #475569;
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+body.ota-public .ota-confirm-steps li {
+  margin-bottom: 0.45rem;
+}
+body.ota-public .ota-confirm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.65rem 0.75rem;
+  max-width: 52rem;
+  margin: 0 auto;
+}
+body.ota-public .ota-confirm-btn-primary {
+  min-height: 48px;
+  font-weight: 800;
+  border-radius: 12px;
+  padding-left: 1.35rem;
+  padding-right: 1.35rem;
+}
+body.ota-public .ota-confirm-btn-secondary,
+body.ota-public .ota-confirm-btn-admin {
+  min-height: 48px;
+  font-weight: 700;
+  border-radius: 12px;
+  border-color: #cbd5e1;
+  background: #fff;
+  color: var(--ota-navy);
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+body.ota-public .ota-confirm-btn-admin {
+  border-color: #94a3b8;
+  background: #f8fafc;
+}
+
+/* —— Flight results (premium OTA) —— */
+.ota-results-pro-head {
+  background: linear-gradient(135deg, var(--ota-navy) 0%, var(--ota-navy-mid) 100%);
+  color: #e2e8f0;
+  padding: 1.75rem 0 1.5rem;
+  margin-bottom: 0;
+}
+.ota-results-pro-title {
+  margin: 0 0 0.35rem;
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.02em;
+}
+.ota-results-pro-sub {
+  margin: 0;
+  font-size: 16px;
+  color: #94a3b8;
+}
+.ota-results-pro-body {
+  padding-bottom: 2.5rem;
+}
+.ota-filter-card {
+  background: var(--ota-card);
+  border: 1px solid var(--ota-border);
+  border-radius: var(--ota-radius);
+  box-shadow: var(--ota-shadow);
+  padding: 1.25rem;
+  position: sticky;
+  top: var(--ota-nav-sticky-top);
+}
+.ota-filter-card h4 {
+  margin: 0 0 1rem;
+  font-size: 0.85rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ota-navy);
+}
+.ota-result-pro-card {
+  background: var(--ota-card);
+  border: 1px solid var(--ota-border);
+  border-radius: var(--ota-radius);
+  box-shadow: var(--ota-shadow);
+  padding: 1.25rem 1.35rem;
+  margin-bottom: 1rem;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+.ota-result-pro-card:hover {
+  border-color: rgba(37, 99, 235, 0.35);
+  box-shadow: 0 8px 28px -8px rgba(15, 23, 42, 0.15);
+}
+.ota-airline-logo {
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 0.35rem;
+  border-radius: 12px;
+  background: linear-gradient(145deg, #f1f5f9, #e2e8f0);
+  border: 1px solid var(--ota-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.85rem;
+  color: var(--ota-navy);
+  letter-spacing: 0.04em;
+}
+.ota-airline-name {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--ota-text);
+}
+.ota-flight-no {
+  font-size: 0.72rem;
+  color: var(--ota-muted);
+  margin-top: 0.15rem;
+}
+.ota-time-row {
+  margin-top: 0.25rem;
+}
+.ota-time-lg {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--ota-navy);
+  letter-spacing: -0.02em;
+}
+.ota-time-sub {
+  font-size: 0.8rem;
+  color: var(--ota-muted);
+  font-weight: 600;
+}
+.ota-dur-line {
+  font-size: 0.75rem;
+  color: var(--ota-muted);
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+.ota-dur-bar {
+  height: 2px;
+  background: linear-gradient(90deg, var(--ota-border), var(--ota-blue), var(--ota-border));
+  border-radius: 2px;
+  margin: 0 0.25rem 0.35rem;
+}
+.ota-result-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin-top: 0.85rem;
+  font-size: 0.8125rem;
+  color: var(--ota-muted);
+}
+.ota-result-tags .fa {
+  margin-right: 0.25rem;
+  color: var(--ota-blue);
+}
+.ota-price-stack {
+  margin: 0.75rem 0 0.85rem;
+}
+.ota-price-lg {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--ota-navy);
+  letter-spacing: -0.02em;
+}
+.ota-price-sub {
+  font-size: 0.78rem;
+  color: var(--ota-muted);
+}
+.ota-pay-later {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ota-blue-dark);
+  margin-top: 0.35rem;
+}
+.ota-select-primary.btn-primary {
+  background: var(--ota-blue);
+  border-color: var(--ota-blue-dark);
+  font-weight: 700;
+  border-radius: var(--ota-radius-sm);
+  padding: 0.55rem 0.75rem;
+}
+.ota-select-primary.btn-primary:hover {
+  background: var(--ota-blue-dark);
+  border-color: #1e40af;
+}
+@media (max-width: 767px) {
+  .ota-results-filters {
+    margin-bottom: 1.25rem;
+  }
+  .ota-filter-card {
+    position: static;
+  }
+  .ota-result-pro-card .text-right {
+    text-align: left !important;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--ota-border);
+  }
+}
