@@ -41,9 +41,9 @@
         <button class="ota-auth-btn" type="submit">Log in</button>
     </form>
 
-    <div style="margin-top:16px;color:#64748b;display:flex;flex-wrap:wrap;gap:10px 18px;">
-        <a class="ota-auth-link" href="{{ route('register') }}">Customer Signup</a>
-        <a class="ota-auth-link" href="{{ route('agent.register') }}">Agent Registration</a>
+    <div class="ota-auth-footer-links">
+        <a class="ota-auth-link" href="{{ route('register') }}">Customer signup</a>
+        <a class="ota-auth-link" href="{{ route('agent.register') }}">Agent registration</a>
         <a class="ota-auth-link" href="{{ route('password.request') }}">Forgot password</a>
         <a class="ota-auth-link" href="{{ route('home') }}">Back to home</a>
     </div>

@@ -16,8 +16,10 @@ use App\Services\Suppliers\Adapters\MockFlightSupplierAdapter;
 use App\Services\Suppliers\Adapters\SabreFlightSupplierAdapter;
 use App\Services\Suppliers\OfferValidationService;
 use Database\Seeders\OtaFoundationSeeder;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
+use Tests\Support\PublicBookingPassengersPayload;
 use Tests\TestCase;
 
 class OfferValidationFlowTest extends TestCase
@@ -75,16 +77,20 @@ class OfferValidationFlowTest extends TestCase
     public function test_public_guest_booking_stores_validation_snapshot_in_meta(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $this->post('/booking/passengers', [
-            'flight_id' => 'mock-1',
-            'from' => 'LHE',
-            'to' => 'DXB',
-            'depart' => now()->addWeek()->toDateString(),
-            'first_name' => 'Public',
-            'last_name' => 'Validation',
-            'email' => 'pv@example.com',
-            'phone' => '+923001112211',
-        ])->assertRedirect(route('booking.review'));
+        $this->withoutMiddleware(ValidateCsrfToken::class);
+        $this->post('/booking/passengers', array_merge(
+            PublicBookingPassengersPayload::merge([
+                'flight_id' => 'mock-1',
+                'offer_id' => 'mock-1',
+                'from' => 'LHE',
+                'to' => 'DXB',
+                'depart' => now()->addWeek()->toDateString(),
+                'first_name' => 'Public',
+                'last_name' => 'Validation',
+                'email' => 'pv@example.com',
+            ]),
+            PublicBookingPassengersPayload::internationalDocuments(),
+        ))->assertRedirect(route('booking.review'));
 
         $meta = Booking::query()->firstOrFail()->meta ?? [];
         $this->assertArrayHasKey('offer_validation_status', $meta);
@@ -108,6 +114,7 @@ class OfferValidationFlowTest extends TestCase
             'last_name' => 'Validation',
             'dob' => now()->subYears(30)->toDateString(),
             'nationality' => 'PK',
+            'gender' => 'M',
             'email' => 'agent.validation@example.com',
             'phone' => '+923001112299',
             'country' => 'Pakistan',
@@ -126,16 +133,20 @@ class OfferValidationFlowTest extends TestCase
             'settings' => ['force_price_change' => true],
         ]);
 
-        $response = $this->post('/booking/passengers', [
-            'flight_id' => 'mock-1',
-            'from' => 'LHE',
-            'to' => 'DXB',
-            'depart' => now()->addWeek()->toDateString(),
-            'first_name' => 'Price',
-            'last_name' => 'Changed',
-            'email' => 'price.changed@example.com',
-            'phone' => '+923001112200',
-        ]);
+        $this->withoutMiddleware(ValidateCsrfToken::class);
+        $response = $this->post('/booking/passengers', array_merge(
+            PublicBookingPassengersPayload::merge([
+                'flight_id' => 'mock-1',
+                'offer_id' => 'mock-1',
+                'from' => 'LHE',
+                'to' => 'DXB',
+                'depart' => now()->addWeek()->toDateString(),
+                'first_name' => 'Price',
+                'last_name' => 'Changed',
+                'email' => 'price.changed@example.com',
+            ]),
+            PublicBookingPassengersPayload::internationalDocuments(),
+        ));
 
         $response->assertRedirect();
     }
@@ -143,16 +154,17 @@ class OfferValidationFlowTest extends TestCase
     public function test_unavailable_result_redirects_with_safe_warning(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $response = $this->post('/booking/passengers', [
+        $this->withoutMiddleware(ValidateCsrfToken::class);
+        $response = $this->post('/booking/passengers', PublicBookingPassengersPayload::merge([
             'flight_id' => 'missing-id',
+            'offer_id' => 'missing-id',
             'from' => 'LHE',
-            'to' => 'DXB',
+            'to' => 'KHI',
             'depart' => now()->addWeek()->toDateString(),
             'first_name' => 'Unavailable',
             'last_name' => 'Case',
             'email' => 'unavailable@example.com',
-            'phone' => '+923001112201',
-        ]);
+        ]));
 
         $response->assertRedirect(route('flights.search'));
     }
@@ -247,16 +259,20 @@ class OfferValidationFlowTest extends TestCase
     public function test_no_credentials_or_tokens_appear_in_validation_snapshot(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $this->post('/booking/passengers', [
-            'flight_id' => 'mock-1',
-            'from' => 'LHE',
-            'to' => 'DXB',
-            'depart' => now()->addWeek()->toDateString(),
-            'first_name' => 'No',
-            'last_name' => 'Secrets',
-            'email' => 'nosecrets@example.com',
-            'phone' => '+923001112202',
-        ]);
+        $this->withoutMiddleware(ValidateCsrfToken::class);
+        $this->post('/booking/passengers', array_merge(
+            PublicBookingPassengersPayload::merge([
+                'flight_id' => 'mock-1',
+                'offer_id' => 'mock-1',
+                'from' => 'LHE',
+                'to' => 'DXB',
+                'depart' => now()->addWeek()->toDateString(),
+                'first_name' => 'No',
+                'last_name' => 'Secrets',
+                'email' => 'nosecrets@example.com',
+            ]),
+            PublicBookingPassengersPayload::internationalDocuments(),
+        ));
         $meta = Booking::query()->firstOrFail()->meta ?? [];
         $serialized = json_encode($meta['validated_offer_snapshot'] ?? []);
         $this->assertIsString($serialized);

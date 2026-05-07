@@ -3,7 +3,7 @@
 @section('title', 'Agent signup - Asif Travels')
 
 @section('content')
-    <section class="ota-section ota-routes-section">
+    <section class="ota-section ota-routes-section ota-agent-landing-rhythm">
         <div class="ota-container ota-container-form">
             <header class="ota-section-head">
                 <p class="ota-section-kicker">Agent partnership</p>

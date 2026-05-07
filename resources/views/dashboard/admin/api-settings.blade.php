@@ -54,7 +54,7 @@
                 $envLabel = ucfirst($env);
             @endphp
             <div class="col-md-6 col-lg-6">
-                <div class="card h-100 shadow-sm">
+                <div class="card h-100 shadow-sm" data-supplier-card>
                     <div class="card-body">
                         <div class="d-flex align-items-start justify-content-between gap-2 flex-wrap">
                             <div>
@@ -67,7 +67,7 @@
                             </div>
                         </div>
 
-                        <p class="text-secondary small mt-2 mb-3">{{ $supplier['notes'] ?? '' }}</p>
+                        <p class="text-secondary small mt-2 mb-3 text-break">{{ $supplier['notes'] ?? '' }}</p>
 
                         <div class="mb-3">
                             <div class="text-secondary small text-uppercase fw-semibold mb-2">Required credentials</div>
@@ -85,7 +85,7 @@
                             @endif
                         </div>
 
-                        <button type="button" class="btn btn-primary btn-sm btn-planned-action" disabled aria-disabled="true">
+                        <button type="button" class="btn btn-primary btn-sm btn-planned-action w-100" disabled aria-disabled="true">
                             Configure @include('components.planned-hint')
                         </button>
                         <span class="text-secondary small ms-2 d-block d-md-inline mt-1 mt-md-0">Vault not connected in this build.</span>

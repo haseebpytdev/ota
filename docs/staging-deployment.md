@@ -72,6 +72,8 @@ npm install
 npm run build
 ```
 
+If Node/NPM cannot run on the server, build artifacts locally/CI and upload only `public/build` (never upload `node_modules`).
+
 ## OTA Data Prep Commands
 
 Use only for staging setup/validation:
@@ -102,4 +104,38 @@ This validates:
 - supplier credential completeness
 - markup rule integrity
 - custom error pages presence
+
+## Web Server Notes
+
+- Web root must point to `.../public` (never project root).
+- Ensure HTTPS for `ota.haseebasif.com` and keep `APP_URL=https://ota.haseebasif.com`.
+
+Nginx baseline:
+
+```nginx
+root /path/to/ota/public;
+index index.php;
+try_files $uri $uri/ /index.php?$query_string;
+```
+
+## Permissions
+
+Writable paths:
+
+- `storage/`
+- `bootstrap/cache/`
+
+Typical Linux commands:
+
+```bash
+chmod -R 775 storage bootstrap/cache
+chown -R www-data:www-data storage bootstrap/cache
+```
+
+## Optional Staging Playwright Smoke
+
+```bash
+STAGING_BASE_URL=https://ota.haseebasif.com npm run e2e:desktop
+STAGING_BASE_URL=https://ota.haseebasif.com npm run e2e:mobile
+```
 

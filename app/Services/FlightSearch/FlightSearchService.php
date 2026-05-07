@@ -9,6 +9,7 @@ use App\Models\Agency;
 use App\Models\SupplierConnection;
 use App\Services\Pricing\PricingRuleService;
 use App\Services\Suppliers\SupplierAdapterResolver;
+use App\Support\OtaE2e;
 
 class FlightSearchService
 {
@@ -52,6 +53,21 @@ class FlightSearchService
                 })
                 ->orderBy('id')
                 ->get();
+        }
+
+        if (OtaE2e::shouldForceMockSupplier()) {
+            $connections = $connections->filter(
+                fn (SupplierConnection $c): bool => $c->provider === SupplierProvider::Mock
+            )->values();
+            if ($connections->isEmpty()) {
+                $connections = collect([
+                    new SupplierConnection([
+                        'provider' => SupplierProvider::Mock,
+                        'status' => SupplierConnectionStatus::Active,
+                        'is_active' => true,
+                    ]),
+                ]);
+            }
         }
 
         if ($connections->isEmpty()) {
@@ -120,6 +136,10 @@ class FlightSearchService
         $fare = $offer['fare_breakdown'] ?? [];
         $airlineCode = (string) ($offer['airline_code'] ?? 'XX');
 
+        $bagArray = is_array($offer['baggage'] ?? null) ? $offer['baggage'] : [];
+        $bagCheckedVal = isset($bagArray['checked']) ? trim((string) $bagArray['checked']) : '';
+        $bagCabinVal = isset($bagArray['cabin']) ? trim((string) $bagArray['cabin']) : '';
+
         return array_merge($offer, [
             'id' => $offer['offer_id'],
             'depart_at' => $offer['departure_at'],
@@ -128,6 +148,8 @@ class FlightSearchService
             'duration_h' => intdiv($durationMinutes, 60),
             'duration_m' => $durationMinutes % 60,
             'baggage' => $baggageSummary,
+            'baggage_checked' => $bagCheckedVal !== '' ? $bagCheckedVal : null,
+            'baggage_cabin' => $bagCabinVal !== '' ? $bagCabinVal : null,
             'base_fare' => (float) ($pricing['base_fare'] ?? ($fare['base_fare'] ?? 0)),
             'currency' => (string) ($pricing['pricing_currency'] ?? ($fare['currency'] ?? 'PKR')),
             'taxes' => (float) ($pricing['taxes'] ?? 0),

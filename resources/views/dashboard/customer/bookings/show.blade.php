@@ -32,7 +32,17 @@
                 <div class="card-header"><h3 class="card-title mb-0">Passengers and contact</h3></div>
                 <div class="card-body">
                     @foreach($booking->passengers as $passenger)
-                        <div>{{ $passenger->title }} {{ $passenger->first_name }} {{ $passenger->last_name }}</div>
+                        <div class="mb-2">
+                            <div>{{ $passenger->title }} {{ $passenger->first_name }} {{ $passenger->last_name }}</div>
+                            @if ($passenger->passport_number)
+                                <div class="small text-secondary">
+                                    Passport {{ \App\Support\Travel\TravelDocumentFormatter::maskPassport($passenger->passport_number) }}
+                                    @if ($passenger->passport_expiry_date)
+                                        · expires {{ $passenger->passport_expiry_date->format('M j, Y') }}
+                                    @endif
+                                </div>
+                            @endif
+                        </div>
                     @endforeach
                     <hr>
                     <div>Email: {{ $booking->contact?->email ?? 'N/A' }}</div>

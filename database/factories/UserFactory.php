@@ -72,4 +72,11 @@ class UserFactory extends Factory
             'account_type' => AccountType::Agent,
         ]);
     }
+
+    public function customer(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'account_type' => AccountType::Customer,
+        ]);
+    }
 }

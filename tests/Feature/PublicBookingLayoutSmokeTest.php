@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\PublicBookingPassengersPayload;
 use Tests\TestCase;
 
 class PublicBookingLayoutSmokeTest extends TestCase
@@ -23,15 +24,17 @@ class PublicBookingLayoutSmokeTest extends TestCase
         $this->assertSame(1, substr_count($html, 'id="ota-main"'), 'Expected single main content landmark');
 
         $this->withoutMiddleware(ValidateCsrfToken::class);
-        $this->post('/booking/passengers', [
-            'flight_id' => 'mock-1',
-            'title' => 'Mr',
-            'first_name' => 'Test',
-            'last_name' => 'User',
-            'email' => 'test@example.com',
-            'phone' => '+923001112233',
-            'country' => 'Pakistan',
-        ]);
+        $this->post('/booking/passengers', array_merge(
+            PublicBookingPassengersPayload::merge([
+                'flight_id' => 'mock-1',
+                'offer_id' => 'mock-1',
+                'from' => 'LHE',
+                'to' => 'DXB',
+                'depart' => $depart,
+                'email' => 'test@example.com',
+            ]),
+            PublicBookingPassengersPayload::internationalDocuments(),
+        ));
 
         $reviewHtml = $this->get(route('booking.review'))->assertOk()->assertSee('Review your booking', false)->getContent();
         $this->assertSame(1, substr_count($reviewHtml, 'class="ota-main-nav'));

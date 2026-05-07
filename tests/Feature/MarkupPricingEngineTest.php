@@ -14,6 +14,7 @@ use App\Services\Pricing\PricingRuleService;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\PublicBookingPassengersPayload;
 use Tests\TestCase;
 
 class MarkupPricingEngineTest extends TestCase
@@ -124,18 +125,20 @@ class MarkupPricingEngineTest extends TestCase
         $this->seed(OtaFoundationSeeder::class);
         $this->withoutMiddleware(ValidateCsrfToken::class);
 
-        $this->post('/booking/passengers', [
-            'flight_id' => 'mock-1',
-            'title' => 'Mr',
-            'first_name' => 'Guest',
-            'last_name' => 'User',
-            'email' => 'guest@example.com',
-            'phone' => '+923001112233',
-            'country' => 'Pakistan',
-            'from' => 'LHE',
-            'to' => 'DXB',
-            'depart' => now()->addDays(12)->toDateString(),
-        ])->assertRedirect(route('booking.review'));
+        $this->post('/booking/passengers', array_merge(
+            PublicBookingPassengersPayload::merge([
+                'flight_id' => 'mock-1',
+                'offer_id' => 'mock-1',
+                'title' => 'Mr',
+                'first_name' => 'Guest',
+                'last_name' => 'User',
+                'email' => 'guest@example.com',
+                'from' => 'LHE',
+                'to' => 'DXB',
+                'depart' => now()->addDays(12)->toDateString(),
+            ]),
+            PublicBookingPassengersPayload::internationalDocuments(),
+        ))->assertRedirect(route('booking.review'));
 
         $booking = Booking::query()->latest('id')->firstOrFail();
         $fare = $booking->fareBreakdown()->firstOrFail();
@@ -225,18 +228,20 @@ class MarkupPricingEngineTest extends TestCase
         $this->seed(OtaFoundationSeeder::class);
         $this->withoutMiddleware(ValidateCsrfToken::class);
 
-        $this->post('/booking/passengers', [
-            'flight_id' => 'mock-1',
-            'title' => 'Mr',
-            'first_name' => 'Snapshot',
-            'last_name' => 'Test',
-            'email' => 'snap@example.com',
-            'phone' => '+923001112233',
-            'country' => 'Pakistan',
-            'from' => 'LHE',
-            'to' => 'DXB',
-            'depart' => now()->addDays(12)->toDateString(),
-        ])->assertRedirect();
+        $this->post('/booking/passengers', array_merge(
+            PublicBookingPassengersPayload::merge([
+                'flight_id' => 'mock-1',
+                'offer_id' => 'mock-1',
+                'title' => 'Mr',
+                'first_name' => 'Snapshot',
+                'last_name' => 'Test',
+                'email' => 'snap@example.com',
+                'from' => 'LHE',
+                'to' => 'DXB',
+                'depart' => now()->addDays(12)->toDateString(),
+            ]),
+            PublicBookingPassengersPayload::internationalDocuments(),
+        ))->assertRedirect();
 
         $booking = Booking::query()->latest('id')->firstOrFail();
         $snapshot = $booking->meta['pricing_snapshot'] ?? [];
@@ -250,18 +255,20 @@ class MarkupPricingEngineTest extends TestCase
         $this->seed(OtaFoundationSeeder::class);
         $this->withoutMiddleware(ValidateCsrfToken::class);
 
-        $this->post('/booking/passengers', [
-            'flight_id' => 'mock-1',
-            'title' => 'Mr',
-            'first_name' => 'Public',
-            'last_name' => 'Pricing',
-            'email' => 'public@example.com',
-            'phone' => '+923001112233',
-            'country' => 'Pakistan',
-            'from' => 'LHE',
-            'to' => 'DXB',
-            'depart' => now()->addDays(20)->toDateString(),
-        ])->assertRedirect(route('booking.review'));
+        $this->post('/booking/passengers', array_merge(
+            PublicBookingPassengersPayload::merge([
+                'flight_id' => 'mock-1',
+                'offer_id' => 'mock-1',
+                'title' => 'Mr',
+                'first_name' => 'Public',
+                'last_name' => 'Pricing',
+                'email' => 'public@example.com',
+                'from' => 'LHE',
+                'to' => 'DXB',
+                'depart' => now()->addDays(20)->toDateString(),
+            ]),
+            PublicBookingPassengersPayload::internationalDocuments(),
+        ))->assertRedirect(route('booking.review'));
 
         $booking = Booking::query()->latest('id')->firstOrFail();
         $this->assertGreaterThan(0, (float) ($booking->fareBreakdown?->markup ?? 0));

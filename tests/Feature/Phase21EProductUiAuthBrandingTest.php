@@ -9,6 +9,7 @@ use App\Models\User;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\PublicBookingPassengersPayload;
 use Tests\TestCase;
 
 class Phase21EProductUiAuthBrandingTest extends TestCase
@@ -199,8 +200,8 @@ class Phase21EProductUiAuthBrandingTest extends TestCase
             ->assertSee('Manage requests and commissions', false)
             ->assertSee('Operator', false)
             ->assertSee('Admin and staff access', false)
-            ->assertSee('Customer Signup', false)
-            ->assertSee('Agent Registration', false);
+            ->assertSee('Customer signup', false)
+            ->assertSee('Agent registration', false);
     }
 
     public function test_auth_and_signup_pages_do_not_show_demo_or_supplier_placeholders(): void
@@ -250,20 +251,21 @@ class Phase21EProductUiAuthBrandingTest extends TestCase
 
         $this->seed(OtaFoundationSeeder::class);
         $this->withoutMiddleware([ValidateCsrfToken::class]);
-        $this->post('/booking/passengers', [
-            'flight_id' => 'mock-1',
-            'from' => 'LHE',
-            'to' => 'DXB',
-            'depart' => now()->addWeek()->format('Y-m-d'),
-            'first_name' => 'Test',
-            'last_name' => 'User',
-            'email' => 'cta.user@example.com',
-            'phone' => '+923001112200',
-        ])->assertRedirect(route('booking.review'));
+        $this->post('/booking/passengers', array_merge(
+            PublicBookingPassengersPayload::merge([
+                'flight_id' => 'mock-1',
+                'offer_id' => 'mock-1',
+                'from' => 'LHE',
+                'to' => 'DXB',
+                'depart' => now()->addWeek()->format('Y-m-d'),
+                'email' => 'cta.user@example.com',
+            ]),
+            PublicBookingPassengersPayload::internationalDocuments(),
+        ))->assertRedirect(route('booking.review'));
 
         $this->get('/booking/review')
             ->assertOk()
-            ->assertSee('Submit booking request', false);
+            ->assertSee('Request booking', false);
     }
 
     public function test_customer_register_page_support_text_is_not_duplicated(): void

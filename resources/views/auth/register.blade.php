@@ -60,5 +60,5 @@
         <button class="ota-auth-btn" type="submit">Create customer account</button>
     </form>
 
-    <p style="margin-top:16px;color:#64748b;">Already registered? <a class="ota-auth-link" href="{{ route('login') }}">Log in</a></p>
+    <p class="ota-auth-footer-links" style="border-top:none;padding-top:0;margin-top:var(--space-6);">Already registered? <a class="ota-auth-link" href="{{ route('login') }}">Log in</a></p>
 @endsection

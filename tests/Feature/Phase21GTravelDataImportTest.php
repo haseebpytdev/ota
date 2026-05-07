@@ -514,7 +514,7 @@ class Phase21GTravelDataImportTest extends TestCase
     public function test_airline_logo_fallback_works_when_logo_missing(): void
     {
         $service = app(AirlineBrandingService::class);
-        $this->assertNull($service->getLogoForCode('ZZ'));
+        $this->assertNull($service->getStoredLogoUrl('ZZ'));
     }
 
     public function test_airline_logo_path_renders_when_airline_logo_exists(): void

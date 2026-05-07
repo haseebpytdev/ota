@@ -37,7 +37,7 @@ class PublicFlightSearchRequest extends FormRequest
                 'multi_to' => ['required', 'array', 'min:2', 'max:6'],
                 'multi_to.*' => ['required', 'string', 'max:8'],
                 'multi_depart' => ['required', 'array', 'min:2', 'max:6'],
-                'multi_depart.*' => ['required', 'date_format:Y-m-d'],
+                'multi_depart.*' => ['required', 'date_format:Y-m-d', 'after_or_equal:today'],
             ]);
         }
 

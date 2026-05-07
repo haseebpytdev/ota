@@ -9,6 +9,7 @@ use App\Services\FlightSearch\FlightDeparturePolicy;
 use App\Services\FlightSearch\FlightSearchResultStore;
 use App\Services\FlightSearch\FlightSearchService;
 use App\Services\TravelData\AirlineBrandingService;
+use App\Support\FlightSearch\FlightOfferDisplayPresenter;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -153,7 +154,13 @@ class FlightController extends Controller
         $filterMeta = $this->buildFilterMeta($offers, $critForFilters);
 
         $airlineLogos = $this->airlineBranding->mapLogosForOffers($slice);
-        $data = array_map(function (array $offer) use ($payload, $searchId, $airlineLogos): array {
+        $iataCodes = [];
+        foreach ($slice as $offRow) {
+            $iataCodes = array_merge($iataCodes, FlightOfferDisplayPresenter::collectIataCodes($offRow));
+        }
+        $cityMap = FlightOfferDisplayPresenter::airportCityMap($iataCodes);
+
+        $data = array_map(function (array $offer) use ($payload, $searchId, $airlineLogos, $cityMap): array {
             $crit = is_array($payload['criteria'] ?? null) ? $payload['criteria'] : [];
             $code = strtoupper((string) ($offer['airline_code'] ?? ($offer['carrier_code'] ?? '')));
             $supplierTotal = (float) ($offer['supplier_total_source'] ?? (($offer['base_fare'] ?? 0) + ($offer['taxes'] ?? 0)));
@@ -183,15 +190,19 @@ class FlightController extends Controller
                         : 'PKR fare not available online for this option.')
                     : FlightDeparturePolicy::SAME_DAY_LEAD_MESSAGE);
 
-            return [
+            $presentation = FlightOfferDisplayPresenter::buildPresentation($offer, $crit, $cityMap);
+            $segmentsFormatted = $presentation['segments_display'];
+            unset($presentation['segments_display']);
+
+            return array_merge([
                 'offer_id' => (string) ($offer['id'] ?? $offer['offer_id'] ?? ''),
                 'provider' => (string) ($offer['supplier_provider'] ?? 'unknown'),
                 'airline_code' => $code,
                 'airline_name' => (string) ($offer['airline_name'] ?? ''),
                 'airline_logo_url' => $airlineLogos[$code] ?? null,
                 'route' => ($payload['criteria']['origin'] ?? '').' → '.($payload['criteria']['destination'] ?? ''),
-                'departure_time' => (string) ($offer['depart_at'] ?? ''),
-                'arrival_time' => (string) ($offer['arrive_at'] ?? ''),
+                'departure_time' => $presentation['departure_time_display'],
+                'arrival_time' => $presentation['arrival_time_display'],
                 'duration' => ((int) ($offer['duration_h'] ?? 0)).'h '.str_pad((string) ((int) ($offer['duration_m'] ?? 0)), 2, '0', STR_PAD_LEFT).'m',
                 'stops' => (int) ($offer['stops'] ?? 0),
                 'baggage' => (string) ($offer['baggage'] ?? ''),
@@ -213,16 +224,8 @@ class FlightController extends Controller
                 'cabin' => (string) ($offer['cabin'] ?? ''),
                 'fare_family' => (string) ($offer['fare_family'] ?? ''),
                 'operating_airline_code' => strtoupper((string) ($offer['operating_carrier_code'] ?? $offer['operating_airline_code'] ?? '')),
-                'segments' => array_values(array_map(function (array $seg): array {
-                    return [
-                        'origin' => (string) ($seg['origin'] ?? ''),
-                        'destination' => (string) ($seg['destination'] ?? ''),
-                        'departure_at' => (string) ($seg['departure_at'] ?? ''),
-                        'arrival_at' => (string) ($seg['arrival_at'] ?? ''),
-                        'airline_code' => (string) ($seg['airline_code'] ?? ''),
-                        'flight_number' => (string) ($seg['flight_number'] ?? ''),
-                    ];
-                }, is_array($offer['segments'] ?? null) ? $offer['segments'] : [])),
+                'seats_left' => isset($offer['seats_left']) ? (int) $offer['seats_left'] : null,
+                'segments' => $segmentsFormatted,
                 'select_url' => $canSelect ? route('booking.passengers', array_merge([
                     'flight_id' => (string) ($offer['id'] ?? $offer['offer_id'] ?? ''),
                     'search_id' => $searchId,
@@ -236,7 +239,7 @@ class FlightController extends Controller
                     'children' => (int) ($crit['children'] ?? 0),
                     'infants' => (int) ($crit['infants'] ?? 0),
                 ], (($rd = trim((string) ($crit['return_date'] ?? ''))) !== '' ? ['return_date' => $rd] : []))) : null,
-            ];
+            ], $presentation);
         }, $slice);
 
         return response()->json([

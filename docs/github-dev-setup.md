@@ -1,8 +1,10 @@
 # GitHub / Cursor Agent demo setup
 
+For **preinstalled PHP, Composer, Node, npm, and Python Playwright + Chromium** in cloud agents / Codespaces, see **`docs/cloud-agent-devcontainer.md`** and `.devcontainer/`.
+
 ## Database snapshot
 
-This repo includes **`database/demo.sqlite`**: a fresh **`php artisan migrate:fresh --seed`** snapshot (demo users and agencies only). No API secrets are stored in the database rows.
+This repo includes **`database/demo.sqlite`**: a fresh **`php artisan migrate:fresh --seed`** snapshot (demo users, agencies, and **reference airports/airlines** for autocomplete). No API secrets are stored in the database rows.
 
 **Local use**
 

@@ -188,7 +188,8 @@ class Phase21KAjaxFlightResultsTest extends TestCase
         $this->get('/flights/results?from=LHE&to=DXB&depart=2026-06-25&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0')
             ->assertOk()
             ->assertSee('data-toggle-details', false)
-            ->assertSee('Flight details ▼', false);
+            ->assertSee('ota-btn-details', false)
+            ->assertSee('Flight details', false);
     }
 
     public function test_cabin_and_baggage_filter_metadata_is_generated_from_results(): void

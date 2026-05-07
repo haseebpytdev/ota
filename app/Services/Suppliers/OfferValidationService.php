@@ -6,9 +6,11 @@ use App\Data\FlightSearchRequestData;
 use App\Data\NormalizedFlightOfferData;
 use App\Data\OfferValidationResultData;
 use App\Enums\SupplierConnectionStatus;
+use App\Enums\SupplierProvider;
 use App\Models\Agency;
 use App\Models\SupplierConnection;
 use App\Services\Pricing\PricingRuleService;
+use App\Support\OtaE2e;
 
 class OfferValidationService
 {
@@ -95,7 +97,7 @@ class OfferValidationService
             return null;
         }
 
-        return SupplierConnection::query()
+        $active = SupplierConnection::query()
             ->where('agency_id', $agency->id)
             ->where('provider', $provider)
             ->where(function ($query): void {
@@ -103,5 +105,24 @@ class OfferValidationService
                     ->orWhere('status', SupplierConnectionStatus::Active->value);
             })
             ->first();
+
+        if ($active !== null) {
+            return $active;
+        }
+
+        // FlightSearchService may use an unsaved mock SupplierConnection when E2E filtering bypasses
+        // inactive DB rows — validation must still resolve the stored agency mock row for the adapter.
+        if (
+            OtaE2e::shouldForceMockSupplier()
+            && strtoupper(trim($provider)) === strtoupper(SupplierProvider::Mock->value)
+        ) {
+            return SupplierConnection::query()
+                ->where('agency_id', $agency->id)
+                ->where('provider', SupplierProvider::Mock)
+                ->orderBy('id')
+                ->first();
+        }
+
+        return null;
     }
 }

@@ -16,8 +16,10 @@ use App\Services\Suppliers\Adapters\MockFlightSupplierAdapter;
 use App\Services\Suppliers\Adapters\SabreFlightSupplierAdapter;
 use App\Services\Suppliers\SupplierAdapterResolver;
 use Database\Seeders\OtaFoundationSeeder;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
+use Tests\Support\PublicBookingPassengersPayload;
 use Tests\TestCase;
 
 class SupplierSearchPipelineTest extends TestCase
@@ -154,17 +156,21 @@ class SupplierSearchPipelineTest extends TestCase
     public function test_booking_created_from_selected_offer_stores_normalized_offer_snapshot(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $this->post('/booking/passengers', [
-            'flight_id' => 'mock-1',
-            'from' => 'LHE',
-            'to' => 'DXB',
-            'depart' => now()->addWeek()->toDateString(),
-            'title' => 'Mr',
-            'first_name' => 'Snapshot',
-            'last_name' => 'Test',
-            'email' => 'snapshot@example.com',
-            'phone' => '+923001112244',
-        ]);
+        $this->withoutMiddleware(ValidateCsrfToken::class);
+        $this->post('/booking/passengers', array_merge(
+            PublicBookingPassengersPayload::merge([
+                'flight_id' => 'mock-1',
+                'offer_id' => 'mock-1',
+                'from' => 'LHE',
+                'to' => 'DXB',
+                'depart' => now()->addWeek()->toDateString(),
+                'title' => 'Mr',
+                'first_name' => 'Snapshot',
+                'last_name' => 'Test',
+                'email' => 'snapshot@example.com',
+            ]),
+            PublicBookingPassengersPayload::internationalDocuments(),
+        ));
 
         $booking = Booking::query()->firstOrFail();
         $meta = $booking->meta ?? [];
@@ -183,17 +189,21 @@ class SupplierSearchPipelineTest extends TestCase
             'credentials' => ['api_key' => 'SHOULD_NOT_APPEAR'],
         ]);
 
-        $this->post('/booking/passengers', [
-            'flight_id' => 'mock-1',
-            'from' => 'LHE',
-            'to' => 'DXB',
-            'depart' => now()->addWeek()->toDateString(),
-            'title' => 'Mr',
-            'first_name' => 'Secret',
-            'last_name' => 'Check',
-            'email' => 'secret@example.com',
-            'phone' => '+923001112245',
-        ]);
+        $this->withoutMiddleware(ValidateCsrfToken::class);
+        $this->post('/booking/passengers', array_merge(
+            PublicBookingPassengersPayload::merge([
+                'flight_id' => 'mock-1',
+                'offer_id' => 'mock-1',
+                'from' => 'LHE',
+                'to' => 'DXB',
+                'depart' => now()->addWeek()->toDateString(),
+                'title' => 'Mr',
+                'first_name' => 'Secret',
+                'last_name' => 'Check',
+                'email' => 'secret@example.com',
+            ]),
+            PublicBookingPassengersPayload::internationalDocuments(),
+        ));
 
         $booking = Booking::query()->firstOrFail();
         $snapshotJson = json_encode($booking->meta['normalized_offer_snapshot'] ?? []);

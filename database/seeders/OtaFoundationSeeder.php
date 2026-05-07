@@ -22,6 +22,8 @@ class OtaFoundationSeeder extends Seeder
 {
     public function run(): void
     {
+        $this->call(AirportAirlineReferenceSeeder::class);
+
         $agency = Agency::query()->updateOrCreate(
             ['slug' => 'asif-travels'],
             [

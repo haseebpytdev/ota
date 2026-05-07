@@ -7,6 +7,8 @@ use App\Enums\UserAccountStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Agency;
 use App\Models\User;
+use App\Support\Auth\CheckoutReturnIntent;
+use App\Support\Auth\LoginDestination;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -21,8 +23,10 @@ class RegisteredUserController extends Controller
     /**
      * Display the registration view.
      */
-    public function create(): View
+    public function create(Request $request): View
     {
+        CheckoutReturnIntent::primeSessionFromQuery($request);
+
         return view('auth.register');
     }
 
@@ -61,6 +65,6 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return redirect()->intended('/customer');
+        return redirect()->intended(LoginDestination::path($user));
     }
 }

@@ -12,6 +12,7 @@ use App\Models\User;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\PublicBookingPassengersPayload;
 use Tests\TestCase;
 
 class FrontendRoutesTest extends TestCase
@@ -172,15 +173,18 @@ class FrontendRoutesTest extends TestCase
         $this->seed(OtaFoundationSeeder::class);
         $this->withoutMiddleware(ValidateCsrfToken::class);
 
-        $this->post('/booking/passengers', [
-            'flight_id' => 'mock-1',
-            'title' => 'Mr',
-            'first_name' => 'Test',
-            'last_name' => 'User',
-            'email' => 'test@example.com',
-            'phone' => '+923001112233',
-            'country' => 'Pakistan',
-        ])->assertRedirect(route('booking.review'));
+        $depart = now()->addWeek()->format('Y-m-d');
+        $this->post('/booking/passengers', array_merge(
+            PublicBookingPassengersPayload::merge([
+                'flight_id' => 'mock-1',
+                'offer_id' => 'mock-1',
+                'from' => 'LHE',
+                'to' => 'DXB',
+                'depart' => $depart,
+                'email' => 'test@example.com',
+            ]),
+            PublicBookingPassengersPayload::internationalDocuments(),
+        ))->assertRedirect(route('booking.review'));
     }
 
     public function test_booking_review_renders_after_passenger_step(): void
@@ -188,15 +192,18 @@ class FrontendRoutesTest extends TestCase
         $this->seed(OtaFoundationSeeder::class);
         $this->withoutMiddleware(ValidateCsrfToken::class);
 
-        $this->post('/booking/passengers', [
-            'flight_id' => 'mock-1',
-            'title' => 'Mr',
-            'first_name' => 'Test',
-            'last_name' => 'User',
-            'email' => 'test@example.com',
-            'phone' => '+923001112233',
-            'country' => 'Pakistan',
-        ]);
+        $depart = now()->addWeek()->format('Y-m-d');
+        $this->post('/booking/passengers', array_merge(
+            PublicBookingPassengersPayload::merge([
+                'flight_id' => 'mock-1',
+                'offer_id' => 'mock-1',
+                'from' => 'LHE',
+                'to' => 'DXB',
+                'depart' => $depart,
+                'email' => 'test@example.com',
+            ]),
+            PublicBookingPassengersPayload::internationalDocuments(),
+        ));
 
         $this->get(route('booking.review'))
             ->assertOk()
@@ -208,15 +215,18 @@ class FrontendRoutesTest extends TestCase
         $this->seed(OtaFoundationSeeder::class);
         $this->withoutMiddleware(ValidateCsrfToken::class);
 
-        $this->post('/booking/passengers', [
-            'flight_id' => 'mock-1',
-            'title' => 'Mr',
-            'first_name' => 'Test',
-            'last_name' => 'User',
-            'email' => 'test@example.com',
-            'phone' => '+923001112233',
-            'country' => 'Pakistan',
-        ]);
+        $depart = now()->addWeek()->format('Y-m-d');
+        $this->post('/booking/passengers', array_merge(
+            PublicBookingPassengersPayload::merge([
+                'flight_id' => 'mock-1',
+                'offer_id' => 'mock-1',
+                'from' => 'LHE',
+                'to' => 'DXB',
+                'depart' => $depart,
+                'email' => 'test@example.com',
+            ]),
+            PublicBookingPassengersPayload::internationalDocuments(),
+        ));
 
         $this->post('/booking/review', [
             'booking_method' => 'bank_transfer',

@@ -5,6 +5,13 @@
 @section('content')
     <h2>Agent signup application</h2>
     <p class="ota-auth-help">Agent applications are reviewed by Asif Travels. After approval, you will receive an activation email.</p>
+    <div class="ota-agent-wizard" aria-label="Application steps">
+        <span class="ota-agent-wizard__step is-active">1. Personal</span>
+        <span class="ota-agent-wizard__step">2. Business</span>
+        <span class="ota-agent-wizard__step">3. Verification</span>
+        <span class="ota-agent-wizard__step">4. Volume</span>
+        <span class="ota-agent-wizard__step">5. Agreement</span>
+    </div>
 
     <form method="POST" action="{{ route('agent.register.store') }}">
         @csrf
@@ -12,7 +19,7 @@
             Agent applications are reviewed by Asif Travels. After approval, you will receive an activation email.
         </div>
 
-        <div class="ota-auth-section-card">
+        <div class="ota-auth-section-card" data-agent-section="personal">
             <h3>1. Personal details</h3>
             <div class="ota-auth-grid-2">
                 <div class="ota-auth-group"><label class="ota-auth-label">First name</label><input class="ota-auth-input" name="first_name" value="{{ old('first_name') }}" required>@error('first_name')<div class="ota-auth-error">{{ $message }}</div>@enderror</div>
@@ -22,7 +29,7 @@
             </div>
         </div>
 
-        <div class="ota-auth-section-card">
+        <div class="ota-auth-section-card" data-agent-section="business">
             <h3>2. Business details</h3>
             <div class="ota-auth-grid-2">
                 <div class="ota-auth-group"><label class="ota-auth-label">Company name</label><input class="ota-auth-input" name="company_name" value="{{ old('company_name') }}" required>@error('company_name')<div class="ota-auth-error">{{ $message }}</div>@enderror</div>
@@ -34,8 +41,8 @@
             <div class="ota-auth-group"><label class="ota-auth-label">Website (optional)</label><input class="ota-auth-input" name="website" value="{{ old('website') }}">@error('website')<div class="ota-auth-error">{{ $message }}</div>@enderror</div>
         </div>
 
-        <div class="ota-auth-section-card">
-            <h3>3. Verification details</h3>
+        <div class="ota-auth-section-card" data-agent-section="verification">
+            <h3>3. Verification</h3>
             <div class="ota-auth-grid-2">
                 <div class="ota-auth-group"><label class="ota-auth-label">CNIC (optional)</label><input class="ota-auth-input" name="cnic" value="{{ old('cnic') }}"></div>
                 <div class="ota-auth-group"><label class="ota-auth-label">NTN (optional)</label><input class="ota-auth-input" name="ntn" value="{{ old('ntn') }}"></div>
@@ -44,8 +51,8 @@
             </div>
         </div>
 
-        <div class="ota-auth-section-card">
-            <h3>4. Travel services</h3>
+        <div class="ota-auth-section-card" data-agent-section="expected-volume">
+            <h3>4. Expected volume</h3>
             <div class="ota-auth-group"><label class="ota-auth-label">Expected monthly booking volume (optional)</label><input class="ota-auth-input" name="expected_booking_volume" value="{{ old('expected_booking_volume') }}"></div>
             <div class="ota-auth-group">
                 <label class="ota-auth-label">Services interested</label>
@@ -56,7 +63,7 @@
             <div class="ota-auth-group"><label class="ota-auth-label">Notes (optional)</label><textarea class="ota-auth-input" name="notes">{{ old('notes') }}</textarea></div>
         </div>
 
-        <div class="ota-auth-section-card">
+        <div class="ota-auth-section-card" data-agent-section="agreement">
             <h3>5. Agreement</h3>
             <label><input type="checkbox" name="terms" value="1" @checked(old('terms'))> I confirm submitted information is accurate.</label>
             @error('terms')<div class="ota-auth-error">{{ $message }}</div>@enderror

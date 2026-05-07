@@ -4,10 +4,12 @@
 
 @section('content')
     @php
+        use App\Support\Travel\TravelDocumentFormatter;
         $d = $draft;
         $o = $offer;
         $cr = $criteria;
         $meta = $booking->meta ?? [];
+        $paxSummary = $leadPassenger ?? null;
         $fare = $booking->fareBreakdown;
         $totalFromDb = (float) ($fare?->total ?? 0);
         $baseFromDb = (float) ($fare?->base_fare ?? 0);
@@ -79,6 +81,34 @@
                         <h2 class="ota-checkout-section-title">Passenger &amp; contact</h2>
                         <div class="ota-review-pax">
                             <p class="ota-review-pax__name"><strong>{{ $d['title'] ?? '' }} {{ $d['first_name'] ?? '' }} {{ $d['last_name'] ?? '' }}</strong></p>
+                            @if ($paxSummary)
+                                <ul class="ota-review-pax__list ota-review-pax__list--docs mb-2">
+                                    @if ($paxSummary->date_of_birth)
+                                        <li><i class="fa fa-calendar"></i> DOB {{ $paxSummary->date_of_birth->format('j M Y') }}</li>
+                                    @endif
+                                    @if ($paxSummary->nationality)
+                                        <li><i class="fa fa-flag-o"></i> Nationality {{ strtoupper($paxSummary->nationality) }}</li>
+                                    @endif
+                                    @if ($paxSummary->gender)
+                                        <li><i class="fa fa-user"></i> Gender {{ $paxSummary->gender }}</li>
+                                    @endif
+                                </ul>
+                                @if ($paxSummary->passport_number || $paxSummary->national_id_number)
+                                    <p class="small text-muted mb-2">
+                                        @if ($paxSummary->document_type === 'national_id' && $paxSummary->national_id_number)
+                                            National ID: {{ TravelDocumentFormatter::maskPassport($paxSummary->national_id_number) }}
+                                        @elseif ($paxSummary->passport_number)
+                                            Passport: {{ TravelDocumentFormatter::maskPassport($paxSummary->passport_number) }}
+                                            @if ($paxSummary->passport_issuing_country)
+                                                · {{ strtoupper($paxSummary->passport_issuing_country) }}
+                                            @endif
+                                            @if ($paxSummary->passport_expiry_date)
+                                                · expires {{ $paxSummary->passport_expiry_date->format('j M Y') }}
+                                            @endif
+                                        @endif
+                                    </p>
+                                @endif
+                            @endif
                             <ul class="ota-review-pax__list">
                                 <li><i class="fa fa-envelope-o"></i> {{ $d['email'] ?? '—' }}</li>
                                 <li><i class="fa fa-phone"></i> {{ $d['phone'] ?? '—' }}</li>
@@ -92,7 +122,7 @@
                     </div>
                 </div>
 
-                <aside class="ota-checkout-aside" aria-label="Fare and confirmation">
+                <aside class="ota-checkout-aside ota-review-aside-stack" aria-label="Fare and confirmation">
                     <div class="ota-checkout-card ota-checkout-card--accent">
                         <h2 class="ota-checkout-section-title">Fare breakdown</h2>
                         <dl class="ota-fare-dl">
@@ -117,6 +147,7 @@
                                 <dd>Rs {{ number_format($totalFromDb > 0 ? $totalFromDb : (float) ($o['total'] ?? 0), 0) }}</dd>
                             </div>
                         </dl>
+                        <p class="small text-muted mb-0 mt-2">Final fare shown in PKR. Fare availability is subject to airline confirmation.</p>
                     </div>
 
                     <form method="post" action="{{ route('booking.review') }}" class="ota-checkout-form">
@@ -148,8 +179,12 @@
                             </label>
                         </div>
 
-                        <button type="submit" class="ota-btn-primary-lg btn btn-lg btn-block">Submit booking request</button>
-                        <p class="ota-checkout-disclaimer">No payment is captured. Your request is saved for the agency to confirm. No ticket is issued yet.</p>
+                        <div class="ota-review-total-hero" aria-live="polite">
+                            <span class="ota-review-total-hero__label">Amount due (PKR)</span>
+                            <span class="ota-review-total-hero__value">Rs {{ number_format($totalFromDb > 0 ? $totalFromDb : (float) ($o['total'] ?? 0), 0) }}</span>
+                        </div>
+                        <button type="submit" class="ota-btn-primary-lg btn btn-lg btn-block">Request booking</button>
+                        <p class="ota-checkout-disclaimer">Booking request is submitted after review. No payment is captured here. Our team will contact you for confirmation or payment if required. No ticket is issued yet.</p>
                     </form>
                 </aside>
             </div>

@@ -20,7 +20,7 @@
         <header class="ota-section-head">
             <p class="ota-section-kicker">Routes</p>
             <h2 class="ota-section-title">Popular corridors</h2>
-            <p class="ota-section-desc">Jump straight into current fare results using the same booking flow.</p>
+            <p class="ota-section-desc">Quick links to search popular routes — final fare shown in PKR after you choose dates.</p>
         </header>
         <div class="ota-routes-grid">
             @foreach ($popularRoutes as $route)

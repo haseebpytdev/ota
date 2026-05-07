@@ -2,11 +2,16 @@
 
 namespace App\Http\Controllers\Frontend;
 
+use App\Enums\AccountType;
+use App\Enums\UserAccountStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Frontend\StoreBookingPassengersRequest;
 use App\Models\Agency;
 use App\Models\Booking;
+use App\Models\User;
 use App\Services\Booking\BookingDraftService;
 use App\Services\Booking\BookingService;
+use App\Services\Booking\InternationalRouteDetector;
 use App\Services\FlightSearch\FlightDeparturePolicy;
 use App\Services\FlightSearch\FlightSearchResultStore;
 use App\Services\FlightSearch\FlightSearchService;
@@ -17,7 +22,9 @@ use App\Support\Security\SensitiveDataRedactor;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\View\View;
 
 class BookingController extends Controller
@@ -32,22 +39,10 @@ class BookingController extends Controller
         protected FlightDeparturePolicy $departurePolicy,
     ) {}
 
-    public function passengers(Request $request): View|RedirectResponse
+    public function passengers(StoreBookingPassengersRequest $request): View|RedirectResponse
     {
         if ($request->isMethod('post')) {
-            $validated = $request->validate([
-                'flight_id' => ['nullable', 'string', 'max:128'],
-                'offer_id' => ['nullable', 'string', 'max:128'],
-                'search_id' => ['nullable', 'string', 'max:128'],
-                'title' => ['nullable', 'string', 'max:16'],
-                'first_name' => ['required', 'string', 'max:120'],
-                'last_name' => ['required', 'string', 'max:120'],
-                'dob' => ['nullable', 'date'],
-                'nationality' => ['nullable', 'string', 'max:8'],
-                'email' => ['required', 'email', 'max:255'],
-                'phone' => ['required', 'string', 'max:64'],
-                'country' => ['nullable', 'string', 'max:120'],
-            ]);
+            $validated = $request->validated();
 
             $selectedOfferId = trim((string) ($validated['offer_id'] ?? $validated['flight_id'] ?? ''));
             if ($selectedOfferId === '') {
@@ -93,11 +88,8 @@ class BookingController extends Controller
             $searchId = $merge['search_id'];
             if ($searchId !== '') {
                 $offer = $this->searchStore->findOffer($searchId, $selectedOfferId);
-                if ($offer === null) {
-                    return redirect()->route('flights.search')
-                        ->withErrors(['flight_id' => __('This fare search has expired. Please search again.')]);
-                }
             }
+            // Offer may be missing from the cached slice (MAX_STORED_OFFERS); fall back to a fresh search before treating the session as expired.
             if ($offer === null) {
                 $offers = $this->flightSearch->search($criteria, $agency, 'public_guest');
                 $offer = collect($offers)->firstWhere('id', $selectedOfferId);
@@ -119,12 +111,26 @@ class BookingController extends Controller
                     ->withErrors(['flight_id' => __(FlightDeparturePolicy::SAME_DAY_LEAD_MESSAGE)]);
             }
 
+            $resultsQuery = [
+                'from' => $criteria['origin'],
+                'to' => $criteria['destination'],
+                'depart' => $criteria['depart_date'],
+                'trip_type' => $criteria['trip_type'] ?? 'one_way',
+                'cabin' => $criteria['cabin'] ?? 'economy',
+                'adults' => $criteria['adults'] ?? 1,
+                'children' => $criteria['children'] ?? 0,
+                'infants' => $criteria['infants'] ?? 0,
+            ];
+            if (($resultsQuery['trip_type'] ?? '') === 'round_trip') {
+                $rd = trim((string) ($criteria['return_date'] ?? ''));
+                if ($rd !== '') {
+                    $resultsQuery['return_date'] = $rd;
+                }
+            }
+
             if (($offer['conversion_status'] ?? 'same_currency') === 'conversion_missing') {
-                return redirect()->route('flights.results', [
-                    'from' => $criteria['origin'],
-                    'to' => $criteria['destination'],
-                    'depart' => $criteria['depart_date'],
-                ])->withErrors(['flight_id' => __('This fare requires currency review before booking.')]);
+                return redirect()->route('flights.results', $resultsQuery)
+                    ->withErrors(['flight_id' => __('This fare requires currency review before booking.')]);
             }
 
             $validation = $this->offerValidationService->validateSelectedOffer($agency, $offer, $criteria + [
@@ -142,11 +148,8 @@ class BookingController extends Controller
                     ->with('validation_result', $validation->toArray());
             }
             if (! $validation->is_valid || $validation->validated_offer === null) {
-                return redirect()->route('flights.results', [
-                    'from' => $criteria['origin'],
-                    'to' => $criteria['destination'],
-                    'depart' => $criteria['depart_date'],
-                ])->withErrors(['flight_id' => __('Selected fare is no longer available. Please choose another option.')]);
+                return redirect()->route('flights.results', $resultsQuery)
+                    ->withErrors(['flight_id' => __('Selected fare is no longer available. Please choose another option.')]);
             }
 
             $normalizedValidated = $validation->validated_offer->toArray();
@@ -156,8 +159,30 @@ class BookingController extends Controller
             $routeStr = $criteria['origin'].' → '.$criteria['destination'];
             $airlineStr = ($offer['airline_name'] ?? '').' ('.($offer['airline_code'] ?? ($offer['carrier_code'] ?? '')).')';
             $travelDate = Carbon::parse($offer['depart_at'] ?? $criteria['depart_date'])->toDateString();
-            $booking = DB::transaction(function () use ($agency, $validated, $offer, $pricing, $criteria, $routeStr, $airlineStr, $travelDate, $validation, $normalizedValidated): Booking {
-                $booking = $this->bookingService->createDraftBooking($agency);
+            $booking = DB::transaction(function () use ($agency, $validated, $offer, $pricing, $criteria, $routeStr, $airlineStr, $travelDate, $validation, $normalizedValidated, $request): Booking {
+                if (! Auth::check() && ($validated['create_account'] ?? false)) {
+                    $user = User::query()->create([
+                        'name' => trim($validated['first_name'].' '.$validated['last_name']),
+                        'email' => $validated['email'],
+                        'password' => Hash::make((string) $validated['password']),
+                        'account_type' => AccountType::Customer,
+                        'status' => UserAccountStatus::Active,
+                        'current_agency_id' => $agency->id,
+                        'meta' => [
+                            'first_name' => $validated['first_name'],
+                            'last_name' => $validated['last_name'],
+                            'phone' => $validated['phone'],
+                            'registered_via' => 'checkout_inline',
+                        ],
+                    ]);
+                    Auth::login($user);
+                    $request->session()->regenerate();
+                }
+
+                $actor = Auth::user();
+                $customer = ($actor instanceof User && $actor->isCustomer()) ? $actor : null;
+
+                $booking = $this->bookingService->createDraftBooking($agency, $customer);
                 $booking->forceFill([
                     'supplier' => $offer['supplier_provider'] ?? 'mock',
                     'route' => $routeStr,
@@ -186,7 +211,22 @@ class BookingController extends Controller
                     'first_name' => $validated['first_name'],
                     'last_name' => $validated['last_name'],
                     'date_of_birth' => $validated['dob'] ?? null,
-                    'nationality' => $validated['nationality'] ?? null,
+                    'nationality' => isset($validated['nationality']) ? strtoupper((string) $validated['nationality']) : null,
+                    'gender' => $validated['gender'] ?? null,
+                    'passport_number' => isset($validated['passport_number']) && trim((string) $validated['passport_number']) !== ''
+                        ? trim((string) $validated['passport_number'])
+                        : null,
+                    'passport_issuing_country' => isset($validated['passport_issuing_country'])
+                        ? strtoupper((string) $validated['passport_issuing_country'])
+                        : null,
+                    'passport_expiry_date' => $validated['passport_expiry_date'] ?? null,
+                    'passport_issue_date' => $validated['passport_issue_date'] ?? null,
+                    'document_type' => $validated['document_type'] ?? 'passport',
+                    'national_id_number' => isset($validated['national_id_number']) && trim((string) $validated['national_id_number']) !== ''
+                        ? trim((string) $validated['national_id_number'])
+                        : null,
+                    'country_of_residence' => $validated['country_of_residence'] ?? null,
+                    'place_of_birth' => $validated['place_of_birth'] ?? null,
                     'meta' => null,
                 ]);
 
@@ -296,6 +336,9 @@ class BookingController extends Controller
             'airlineLogo' => $offer !== null
                 ? $this->airlineBranding->getLogoForCode((string) ($offer['airline_code'] ?? ($offer['carrier_code'] ?? '')))
                 : null,
+            'hideInlineAccount' => Auth::check(),
+            'isInternationalRoute' => app(InternationalRouteDetector::class)
+                ->isInternational((string) ($draft['search_from'] ?? ''), (string) ($draft['search_to'] ?? '')),
         ]);
     }
 
@@ -362,6 +405,9 @@ class BookingController extends Controller
             'title' => $pax?->title,
             'first_name' => $pax?->first_name,
             'last_name' => $pax?->last_name,
+            'dob' => $pax?->date_of_birth?->format('Y-m-d'),
+            'gender' => $pax?->gender,
+            'nationality' => $pax?->nationality,
             'email' => $contact?->email,
             'phone' => $contact?->phone,
             'country' => $contact?->country,
@@ -372,6 +418,7 @@ class BookingController extends Controller
 
         return view('frontend.booking.review', [
             'draft' => $draft,
+            'leadPassenger' => $pax,
             'offer' => $offer,
             'criteria' => $criteria,
             'booking' => $booking,

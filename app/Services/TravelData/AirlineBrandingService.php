@@ -9,7 +9,23 @@ use Illuminate\Support\Str;
 
 class AirlineBrandingService
 {
+    /**
+     * Resolved logo URL: uploaded file under storage/app/public first, then optional CDN by IATA code.
+     */
     public function getLogoForCode(?string $code): ?string
+    {
+        $stored = $this->getStoredLogoUrl($code);
+        if ($stored !== null) {
+            return $stored;
+        }
+
+        return $this->cdnLogoUrlForCode($code);
+    }
+
+    /**
+     * Uploaded logo only (no CDN). Used when callers must avoid external URLs.
+     */
+    public function getStoredLogoUrl(?string $code): ?string
     {
         if ($code === null || trim($code) === '') {
             return null;
@@ -32,6 +48,28 @@ class AirlineBrandingService
         }
 
         return Storage::url($airline->logo_path);
+    }
+
+    /**
+     * Public CDN URL for 2-letter IATA codes when enabled (e.g. Kiwi airline images).
+     */
+    public function cdnLogoUrlForCode(?string $code): ?string
+    {
+        if (! config('ota.airline_logo_cdn_enabled', true)) {
+            return null;
+        }
+
+        $normalized = Str::upper(trim((string) $code));
+        if (! preg_match('/^[A-Z0-9]{2}$/', $normalized)) {
+            return null;
+        }
+
+        $template = (string) config(
+            'ota.airline_logo_cdn_template',
+            'https://images.kiwi.com/airlines/64x64/{CODE}.png'
+        );
+
+        return str_replace('{CODE}', $normalized, $template);
     }
 
     /**
@@ -79,6 +117,17 @@ class AirlineBrandingService
             }
             if ($airline->icao_code !== null) {
                 $map[Str::upper($airline->icao_code)] = $url;
+            }
+        }
+
+        foreach ($codes as $code) {
+            $key = Str::upper((string) $code);
+            if (isset($map[$key])) {
+                continue;
+            }
+            $cdn = $this->cdnLogoUrlForCode($key);
+            if ($cdn !== null) {
+                $map[$key] = $cdn;
             }
         }
 

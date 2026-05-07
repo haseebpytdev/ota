@@ -40,6 +40,9 @@
   padding-top: var(--ota-fixed-header-height);
   box-sizing: border-box;
 }
+.ota-page-home .ota-site-main {
+  background: linear-gradient(180deg, #0c1929 0, #0c1929 8rem, #f8fafc 8rem);
+}
 
 @media (min-width: 768px) {
   :root {
@@ -1647,6 +1650,25 @@ body.ota-public .ota-checkout-page-head {
 body.ota-public .ota-checkout-page-head--flush {
   max-width: none;
 }
+body.ota-public .ota-checkout-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.7rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #1d4ed8;
+  background: #dbeafe;
+  border: 1px solid #bfdbfe;
+}
+body.ota-public .ota-checkout-stepper span {
+  color: #64748b;
+  font-weight: 700;
+}
 body.ota-public .ota-flow-badge {
   display: inline-flex;
   align-items: center;
@@ -1695,6 +1717,36 @@ body.ota-public .ota-checkout-account-card__text {
   line-height: 1.45;
   color: #64748b;
 }
+body.ota-public .ota-checkout-card--choice {
+  margin-bottom: 1rem;
+}
+body.ota-public .ota-checkout-choices {
+  margin: 0;
+  padding: 0;
+}
+body.ota-public .ota-checkout-choices__item {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--ota-border);
+}
+body.ota-public .ota-checkout-choices__item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+body.ota-public .ota-checkout-choices__badge {
+  flex-shrink: 0;
+  width: 2rem;
+  text-align: center;
+  color: var(--ota-muted);
+  padding-top: 0.15rem;
+}
+body.ota-public .ota-checkbox-label {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
 body.ota-public .ota-btn-account {
   display: inline-block;
   width: 100%;
@@ -1710,6 +1762,60 @@ body.ota-public .ota-btn-account {
 }
 body.ota-public .ota-btn-account:disabled {
   opacity: 0.85;
+}
+body.ota-public a.ota-btn-account--secondary {
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--ota-navy);
+  background: #fff;
+  border-color: #cbd5e1;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+body.ota-public a.ota-btn-account--secondary:hover {
+  border-color: #94a3b8;
+  background: #f8fafc;
+  color: var(--ota-navy);
+}
+body.ota-public .ota-checkout-review-hint {
+  margin: 1rem 0 0.75rem;
+  line-height: 1.45;
+}
+body.ota-public .ota-checkout-wa--subtle {
+  background: #f8fafc;
+  border-style: dashed;
+  box-shadow: none;
+}
+body.ota-public .ota-checkout-wa--subtle .ota-btn-wa {
+  font-weight: 700;
+  background: #22c55e !important;
+  border-color: #16a34a !important;
+  opacity: 0.95;
+}
+body.ota-public .ota-review-aside-stack .ota-checkout-form .ota-checkout-card {
+  margin-bottom: 1rem;
+}
+body.ota-public .ota-review-total-hero {
+  margin: 0 0 1rem;
+  padding: 1rem 1.1rem;
+  border-radius: var(--ota-radius-sm);
+  background: linear-gradient(135deg, #eff6ff 0%, #f8fafc 100%);
+  border: 1px solid rgba(37, 99, 235, 0.25);
+  text-align: center;
+}
+body.ota-public .ota-review-total-hero__label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #64748b;
+  margin-bottom: 0.25rem;
+}
+body.ota-public .ota-review-total-hero__value {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: var(--ota-navy);
+  letter-spacing: -0.02em;
 }
 body.ota-public .ota-checkout-summary-route {
   margin: 0 0 0.25rem;
@@ -1798,6 +1904,18 @@ body.ota-public .ota-checkout-card {
   padding: 1.35rem 1.5rem;
   margin-bottom: 1rem;
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+body.ota-public .ota-checkout-card--section {
+  border-left: 4px solid #dbeafe;
+  padding-top: 1.15rem;
+}
+body.ota-public .ota-checkout-section-kicker {
+  margin: 0 0 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #64748b;
 }
 body.ota-public .ota-checkout-card--accent {
   border-color: rgba(37, 99, 235, 0.22);
@@ -2286,6 +2404,11 @@ body.ota-public .ota-confirm-ref__label {
   color: #64748b;
   margin-bottom: 0.2rem;
 }
+body.ota-public .ota-confirm-ref__value--hero {
+  font-size: clamp(1.5rem, 4vw, 2.15rem) !important;
+  letter-spacing: -0.03em;
+  font-weight: 800 !important;
+}
 body.ota-public .ota-confirm-ref__value {
   display: block;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
@@ -2621,9 +2744,282 @@ body.ota-public .ota-confirm-btn-admin {
   flex-wrap: wrap;
   gap: 6px;
 }
-@media (max-width: 767px) {
+
+[data-active-filter-chips] {
+  min-height: 0;
+}
+[data-active-filter-chips]:empty {
+  display: none;
+}
+.ota-filter-chips-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ota-muted);
+  margin-right: 0.35rem;
+}
+.ota-filter-chip {
+  border-radius: 999px;
+  border-color: var(--ota-border);
+  margin-right: 4px;
+  margin-bottom: 4px;
+}
+
+/* Filter panel layout */
+.ota-results-filters[data-filter-panel] {
+  position: relative;
+}
+.ota-filter-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+.ota-filter-title {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ota-navy);
+}
+.ota-filter-section {
+  border: 1px solid var(--ota-border);
+  border-radius: var(--ota-radius-sm);
+  padding: 0 0.85rem;
+  margin-bottom: 0.65rem;
+  background: #fafbfc;
+}
+.ota-filter-section:last-of-type {
+  margin-bottom: 1rem;
+}
+.ota-filter-section > summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 0.65rem 0;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--ota-navy);
+}
+.ota-filter-section > summary::-webkit-details-marker {
+  display: none;
+}
+.ota-filter-section > summary::after {
+  content: "";
+  float: right;
+  width: 0;
+  height: 0;
+  margin-top: 0.35rem;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid var(--ota-muted);
+}
+.ota-filter-section[open] > summary::after {
+  transform: rotate(180deg);
+}
+.ota-filter-section .form-group:last-child {
+  margin-bottom: 0.85rem;
+}
+.ota-filter-actions {
+  margin-top: 0.5rem;
+}
+.ota-filter-actions .btn + .btn {
+  margin-top: 0.45rem;
+}
+
+/* Mobile sticky sort / filters bar */
+.ota-results-mobile-bar {
+  display: flex;
+  gap: 8px;
+  position: sticky;
+  top: calc(var(--ota-fixed-header-height) + 6px);
+  z-index: 1075;
+  padding: 10px 0 12px;
+  margin: 0 -4px 12px;
+  background: linear-gradient(to bottom, #f8fafc 70%, transparent);
+}
+.ota-results-mobile-bar .btn {
+  flex: 1;
+  font-weight: 700;
+  border-radius: var(--ota-radius-sm);
+}
+.ota-results-mobile-bar .btn-primary .badge {
+  background: rgba(255, 255, 255, 0.22);
+  margin-left: 4px;
+}
+.ota-results-mobile-bar .btn .badge {
+  font-weight: 800;
+}
+
+.ota-filter-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1190;
+  background: rgba(15, 23, 42, 0.45);
+}
+
+/* Result card v2 */
+.ota-result-card-v2 .ota-result-card-row {
+  align-items: center;
+}
+.ota-result-card-v2 {
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+.ota-result-card-v2:hover {
+  transform: translateY(-1px);
+  border-color: rgba(59, 130, 246, 0.35);
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.1);
+}
+.ota-result-col-brand {
+  padding-bottom: 0;
+}
+.ota-result-brand-logo {
+  margin-bottom: 0.35rem;
+}
+.ota-result-mid {
+  padding-top: 0;
+}
+.ota-result-stops {
+  font-size: 10px !important;
+  font-weight: 700;
+  padding: 0.28em 0.65em;
+}
+.ota-result-col-price {
+  text-align: right;
+}
+.ota-result-badges {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 0.35rem;
+}
+.ota-result-badge {
+  font-size: 10px !important;
+  font-weight: 700;
+  padding: 0.35em 0.65em;
+}
+.ota-result-col-price .ota-price-stack {
+  margin-top: 0.2rem;
+}
+.ota-result-col-price .ota-price-lg {
+  font-size: 1.75rem;
+}
+.ota-btn-book.btn-primary {
+  margin-bottom: 8px;
+  min-height: 46px;
+  font-weight: 800;
+  border-radius: 10px;
+  box-shadow: 0 8px 16px rgba(30, 64, 175, 0.18);
+}
+.ota-btn-details {
+  font-weight: 600;
+  border-radius: var(--ota-radius-sm);
+}
+.ota-result-disabled-msg {
+  margin-bottom: 8px;
+}
+.ota-result-details-wrap {
+  margin-top: 0.85rem;
+}
+.ota-result-details {
+  border-top: 1px solid var(--ota-border);
+  padding-top: 1rem;
+  margin-top: 0;
+  text-align: left;
+}
+.ota-detail-line {
+  margin: 0 0 0.65rem;
+  font-size: 0.9rem;
+}
+.ota-detail-seg {
+  margin: 0.35rem 0 0 1.15rem;
+  padding: 0;
+}
+.ota-detail-pricing-note {
+  margin: 0.75rem 0 0;
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--ota-border);
+}
+
+/* Flight card schedule row + rich details (Phase 22E) */
+.ota-result-schedule {
+  margin-top: 0.25rem;
+}
+.ota-result-leg {
+  min-height: 5.1rem;
+}
+.ota-result-leg--right {
+  text-align: right;
+}
+.ota-result-leg .ota-time-lg {
+  font-size: 1.5rem;
+  line-height: 1.05;
+}
+.ota-result-leg__date {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--ota-muted);
+  margin-top: 0.2rem;
+}
+.ota-result-leg__code {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--ota-navy);
+  margin-top: 0.3rem;
+  letter-spacing: 0.04em;
+}
+.ota-result-leg__city {
+  margin-top: 0.15rem;
+  line-height: 1.3;
+}
+.ota-arr-offset {
+  font-size: 10px !important;
+  font-weight: 700;
+  vertical-align: middle;
+  margin-left: 4px;
+}
+.ota-detail-section {
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--ota-border);
+}
+.ota-detail-section:last-of-type {
+  border-bottom: none;
+}
+.ota-detail-section-title {
+  margin: 0 0 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ota-muted);
+}
+.ota-detail-segment-card {
+  border: 1px solid var(--ota-border);
+  border-radius: var(--ota-radius-sm);
+  padding: 0.65rem 0.85rem;
+  margin-bottom: 0.65rem;
+  background: #fafbfc;
+}
+.ota-detail-segment-head {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--ota-navy);
+  margin-bottom: 0.35rem;
+}
+body.ota-public .ota-checkout-flight-compact__route .ota-arr-offset {
+  margin-left: 6px;
+}
+
+@media (max-width: 991px) {
   .ota-results-filters {
-    margin-bottom: 1.25rem;
+    margin-bottom: 0;
   }
   .ota-filter-card {
     position: fixed;
@@ -2631,15 +3027,133 @@ body.ota-public .ota-confirm-btn-admin {
     left: 0;
     right: 0;
     bottom: 0;
-    top: 15%;
+    top: 12%;
+    max-height: 88vh;
     z-index: 1200;
     overflow: auto;
-    border-radius: 14px 14px 0 0;
+    border-radius: 16px 16px 0 0;
+    box-shadow: var(--ota-shadow-lg);
   }
-  .ota-result-pro-card .text-right {
+  .ota-result-col-price {
     text-align: left !important;
     margin-top: 1rem;
     padding-top: 1rem;
     border-top: 1px solid var(--ota-border);
+  }
+  .ota-result-col-route {
+    padding-bottom: 0.25rem;
+  }
+  .ota-result-badges {
+    justify-content: flex-start;
+  }
+  .ota-results-mobile-bar {
+    top: calc(var(--ota-fixed-header-height) + 2px);
+    padding-bottom: 10px;
+  }
+}
+
+@media (min-width: 992px) {
+  .ota-filter-card {
+    display: block !important;
+    position: sticky;
+    top: var(--ota-nav-sticky-top);
+  }
+  .ota-filter-backdrop {
+    display: none !important;
+  }
+}
+
+/* ========== Phase 22H — mobile visual polish ========== */
+@media (max-width: 991px) {
+  body.ota-public {
+    background: #f8fafc;
+  }
+  .ota-page-home .ota-site-main {
+    background: linear-gradient(180deg, #0c1929 0, #0c1929 6.5rem, #f8fafc 6.5rem);
+  }
+  body.ota-public .ota-hero {
+    padding: 3.65rem 0 2.7rem;
+  }
+  body.ota-public .ota-section {
+    padding: 2.35rem 0;
+  }
+  body.ota-public .ota-metrics-band {
+    padding: 1.15rem 0 1.45rem;
+  }
+  .metric-grid {
+    gap: 0.65rem;
+  }
+  .metric-card {
+    padding: 1rem 0.75rem 0.95rem;
+    min-height: 0;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+  }
+  .metric-card-value {
+    font-size: 1.35rem;
+  }
+  .metric-card-label {
+    font-size: 13px;
+    line-height: 1.35;
+  }
+  .metric-card-icon {
+    width: 2rem;
+    height: 2rem;
+    margin-bottom: 0.45rem;
+    font-size: 0.9rem;
+  }
+  .ota-result-leg .ota-time-lg {
+    white-space: nowrap;
+    font-size: 1.35rem;
+  }
+  .ota-result-leg__date {
+    white-space: nowrap;
+    font-size: 0.74rem;
+  }
+  .ota-result-card-v2 .ota-btn-book.btn-primary {
+    min-height: 48px;
+    font-weight: 800;
+    font-size: 1rem;
+  }
+  .ota-result-card-v2 .ota-btn-details {
+    min-height: 44px;
+    font-weight: 700;
+  }
+  .ota-price-lg {
+    font-variant-numeric: tabular-nums;
+  }
+  body.ota-public .ota-checkout-card {
+    border-radius: var(--ota-radius);
+    box-shadow: 0 2px 12px rgba(15, 23, 42, 0.06);
+    margin-bottom: 1rem;
+  }
+  body.ota-public .ota-checkout-stepper {
+    width: 100%;
+    justify-content: center;
+    margin-bottom: 0.75rem;
+  }
+  body.ota-public .ota-checkout-card--section {
+    border-left-width: 0;
+    border-top: 3px solid #dbeafe;
+  }
+  body.ota-public .ota-checkout-submit-bar {
+    position: sticky;
+    bottom: 0;
+    z-index: 1060;
+    margin: 1.35rem calc(-1 * var(--ota-gutter-x)) 0;
+    padding: 0.85rem var(--ota-gutter-x) calc(0.85rem + env(safe-area-inset-bottom, 0px));
+    background: linear-gradient(to top, rgba(241, 245, 249, 0.97) 55%, rgba(241, 245, 249, 0));
+    border-top: 1px solid var(--ota-border);
+  }
+  body.ota-public .ota-checkout-submit-bar .btn {
+    margin-bottom: 0;
+  }
+  body.ota-public .ota-checkout-sticky-summary {
+    margin-bottom: 1rem;
+  }
+}
+
+@media (max-width: 991px) {
+  body.ota-public .ota-agent-landing-rhythm .ota-section-head {
+    margin-bottom: 1.25rem;
   }
 }

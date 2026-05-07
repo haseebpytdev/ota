@@ -30,7 +30,7 @@
                         <div style="display:flex;gap:8px;flex-wrap:wrap;">
                             <a href="{{ route('lookup-booking.form') }}" class="ota-btn" style="border:1px solid #cbd5e1;background:#fff;color:#0f172a;">Lookup Booking</a>
                             <a href="{{ route('flights.search') }}" class="ota-btn ota-btn-primary">Book Flights</a>
-                            <a href="{{ route('contact') }}" class="ota-btn" style="border:1px solid #cbd5e1;background:#fff;color:#0f172a;">Contact Support</a>
+                            <a href="{{ route('contact') }}" class="ota-btn" style="border:1px solid #cbd5e1;background:#fff;color:#0f172a;">Contact form &amp; channels</a>
                         </div>
                     </div>
                 </div>

@@ -14,6 +14,7 @@ use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Mockery;
+use Tests\Support\PublicBookingPassengersPayload;
 use Tests\TestCase;
 
 class Phase22CFlightSearchRulesTest extends TestCase
@@ -189,23 +190,25 @@ class Phase22CFlightSearchRulesTest extends TestCase
         $searchId = $store->store($criteria, [$offer], []);
 
         $this->withoutMiddleware([ValidateCsrfToken::class]);
-        $this->post('/booking/passengers', [
-            'flight_id' => 'offer-too-soon',
-            'offer_id' => 'offer-too-soon',
-            'search_id' => $searchId,
-            'from' => 'LHE',
-            'to' => 'DXB',
-            'depart' => '2026-08-10',
-            'trip_type' => 'one_way',
-            'cabin' => 'economy',
-            'adults' => 1,
-            'children' => 0,
-            'infants' => 0,
-            'first_name' => 'Test',
-            'last_name' => 'User',
-            'email' => 'test.user@example.com',
-            'phone' => '+923001112233',
-        ])->assertRedirect(route('flights.search'))
+        $this->post('/booking/passengers', array_merge(
+            PublicBookingPassengersPayload::merge([
+                'flight_id' => 'offer-too-soon',
+                'offer_id' => 'offer-too-soon',
+                'search_id' => $searchId,
+                'from' => 'LHE',
+                'to' => 'DXB',
+                'depart' => '2026-08-10',
+                'trip_type' => 'one_way',
+                'cabin' => 'economy',
+                'adults' => 1,
+                'children' => 0,
+                'infants' => 0,
+                'first_name' => 'Test',
+                'last_name' => 'User',
+                'email' => 'test.user@example.com',
+            ]),
+            PublicBookingPassengersPayload::internationalDocuments(),
+        ))->assertRedirect(route('flights.search'))
             ->assertSessionHasErrors('flight_id');
     }
 

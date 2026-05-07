@@ -37,7 +37,7 @@
     <link rel="stylesheet" href="{{ $tn }}/css/font-awesome.min.css" />
     <link rel="stylesheet" href="{{ $tn }}/css/bootstrap.min.css" />
     <link rel="stylesheet" href="{{ asset('css/ota-design-system.css') }}?v=1" />
-    <link rel="stylesheet" href="{{ asset('css/ota-public.css') }}?v=16" />
+    <link rel="stylesheet" href="{{ asset('css/ota-public.css') }}?v=20" />
 
     <style>
         :root {
@@ -47,7 +47,7 @@
     @stack('styles')
 </head>
 
-<body class="ota-public">
+<body class="ota-public {{ request()->routeIs('home') ? 'ota-page-home' : 'ota-page-inner' }}">
     <div class="ota-site-header">
         <div class="ota-slim-topbar">
             <div class="ota-slim-topbar-inner">

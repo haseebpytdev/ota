@@ -10,6 +10,30 @@ use Illuminate\Support\Str;
 
 class AirportSearchController extends Controller
 {
+    /**
+     * Human-readable suggestion line (never a lone em dash / placeholder).
+     */
+    protected static function formatAirportLabel(Airport $airport): string
+    {
+        $city = trim((string) ($airport->city ?? ''));
+        $name = trim((string) ($airport->name ?? ''));
+        $code = strtoupper(trim((string) ($airport->iata_code ?? '')));
+
+        if ($city !== '' && $name !== '') {
+            return "{$city} — {$name}";
+        }
+
+        if ($name !== '') {
+            return $name;
+        }
+
+        if ($city !== '') {
+            return $city;
+        }
+
+        return $code !== '' ? "{$code}" : '';
+    }
+
     public function __invoke(Request $request): JsonResponse
     {
         $q = trim((string) $request->query('q', ''));
@@ -73,18 +97,17 @@ class AirportSearchController extends Controller
 
         return response()->json(
             $airports->map(static function (Airport $airport): array {
-                $city = trim((string) ($airport->city ?? ''));
-                $name = trim((string) ($airport->name ?? ''));
-                $country = trim((string) ($airport->country ?? ''));
-
                 return [
                     'iata_code' => $airport->iata_code,
                     'icao_code' => $airport->icao_code,
-                    'label' => trim("{$city} — {$name}"),
+                    'label' => self::formatAirportLabel($airport),
                     'city' => $airport->city,
                     'country' => $airport->country,
                     'name' => $airport->name,
                 ];
+            })->filter(static function (array $row): bool {
+                return trim((string) ($row['label'] ?? '')) !== ''
+                    && trim((string) ($row['iata_code'] ?? '')) !== '';
             })->values()->all()
         );
     }

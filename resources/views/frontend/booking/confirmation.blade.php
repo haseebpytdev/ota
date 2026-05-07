@@ -31,7 +31,7 @@
                 <div class="ota-confirm-meta">
                     <div class="ota-confirm-ref">
                         <span class="ota-confirm-ref__label">Booking reference</span>
-                        <span class="ota-confirm-ref__value">{{ $ref ?? '—' }}</span>
+                        <span class="ota-confirm-ref__value ota-confirm-ref__value--hero">{{ $ref ?? '—' }}</span>
                         @unless ($ref)
                             <span class="ota-confirm-ref__hint">Complete the review step to generate your booking reference.</span>
                         @endunless
@@ -99,22 +99,21 @@
                     @endif
                 </article>
 
-                <article class="ota-confirm-card">
+                <article class="ota-confirm-card" data-confirmation-next-steps>
                     <h2 class="ota-confirm-card__title"><i class="fa fa-list-ul"></i> Next steps</h2>
                     <ol class="ota-confirm-steps">
-                        <li>The agency reviews availability and fare for your request.</li>
-                        <li>You are contacted by phone, WhatsApp, or email with options and payment details.</li>
-                        <li>A ticket is issued only after payment and confirmation in a live system.</li>
-                        <li>Your request is stored for the agency; start a new search anytime for another trip.</li>
+                        <li>Asif Travels reviews your booking request.</li>
+                        <li>You receive payment instructions or confirmation when required.</li>
+                        <li>Ticketing happens after verification and payment where applicable.</li>
                     </ol>
+                    <p class="small text-muted mb-0">Our team will contact you for confirmation or payment if required.</p>
                 </article>
             </div>
 
             <nav class="ota-confirm-actions" aria-label="What would you like to do next?">
-                <a href="{{ route('lookup-booking.form') }}" class="btn btn-default btn-lg ota-confirm-btn-secondary">View booking</a>
-                <a href="{{ route('flights.search') }}" class="btn btn-primary btn-lg ota-confirm-btn-primary">Book another flight</a>
                 <a href="{{ route('home') }}" class="btn btn-default btn-lg ota-confirm-btn-secondary">Back to home</a>
-                <a href="{{ route('support') }}" class="btn btn-default btn-lg ota-confirm-btn-admin">Contact support</a>
+                <a href="{{ route('lookup-booking.form') }}" class="btn btn-primary btn-lg ota-confirm-btn-primary">Lookup booking</a>
+                <a href="{{ route('support') }}" class="btn btn-default btn-lg ota-confirm-btn-secondary">Contact support</a>
             </nav>
         </div>
     </section>

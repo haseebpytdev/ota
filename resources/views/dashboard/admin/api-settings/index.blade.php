@@ -34,83 +34,95 @@
         <div class="col-sm-6 col-lg-3"><div class="card card-sm ota-kpi-card ota-kpi-accent-violet"><div class="card-body"><div class="text-secondary">Live</div><div class="h2 mb-0">{{ number_format((int) ($k['live'] ?? 0)) }}</div></div></div></div>
     </div>
 
-    <div class="card">
-        <div class="table-responsive">
-            <table class="table table-vcenter card-table ota-admin-table mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>Provider</th>
-                        <th>Name</th>
-                        <th>Environment</th>
-                        <th>Status</th>
-                        <th>Credentials</th>
-                        <th>API Version</th>
-                        <th>Last tested</th>
-                        <th>Last test status</th>
-                        <th>Last error</th>
-                        <th>Last search success</th>
-                        <th>Last order success</th>
-                        <th class="text-end">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($connections as $connection)
-                        <tr>
-                            <td class="text-capitalize">{{ str_replace('_', ' ', $connection->provider->value) }}</td>
-                            <td class="fw-semibold">{{ $connection->name }}</td>
-                            <td class="text-capitalize">{{ $connection->environment->value }}</td>
-                            <td>
-                                <span class="badge {{ $connection->status->value === 'active' ? 'bg-success' : ($connection->status->value === 'error' ? 'bg-danger' : 'bg-secondary') }}">
-                                    {{ $connection->status->value === 'active' ? 'Active' : 'Inactive' }}
-                                </span>
-                                @if($connection->provider->value === 'duffel')
-                                    <span class="badge bg-azure-lt text-azure ms-1">Duffel</span>
+    <div class="row row-cards mb-4">
+        @forelse ($connections as $connection)
+            <div class="col-md-6 col-xl-4">
+                <div class="card h-100 ota-supplier-connection-card" data-supplier-card>
+                    <div class="card-body">
+                        <div class="d-flex align-items-start justify-content-between gap-2 mb-2">
+                            <div>
+                                <div class="text-secondary small">Provider</div>
+                                <div class="fw-semibold text-capitalize">{{ str_replace('_', ' ', $connection->provider->value) }}</div>
+                            </div>
+                            <span class="badge {{ $connection->status->value === 'active' ? 'bg-success' : ($connection->status->value === 'error' ? 'bg-danger' : 'bg-secondary') }}">
+                                {{ $connection->status->value === 'active' ? 'Active' : 'Inactive' }}
+                            </span>
+                        </div>
+                        <div class="mb-2 fw-semibold">{{ $connection->name }}</div>
+                        @php($envSlug = $connection->environment->value)
+                        <div class="small text-secondary mb-3">
+                            Environment:
+                            <span class="text-dark">
+                                @if ($envSlug === 'sandbox')
+                                    Sandbox
+                                @elseif ($envSlug === 'live')
+                                    Live
+                                @else
+                                    Training
                                 @endif
-                            </td>
-                            <td>
-                                @if($connection->provider->value === 'duffel')
-                                    @if(!empty($connection->credentials['access_token'] ?? null))
+                            </span>
+                            @if ($envSlug === 'sandbox')
+                                <span class="badge bg-azure-lt text-azure ms-1">Sandbox</span>
+                            @elseif ($envSlug === 'live')
+                                <span class="badge bg-green-lt text-green ms-1">Live</span>
+                            @else
+                                <span class="badge bg-secondary-lt text-secondary ms-1">Training</span>
+                            @endif
+                        </div>
+                        <dl class="row small mb-2">
+                            <dt class="col-6 text-secondary">Credentials</dt>
+                            <dd class="col-6 mb-1 text-end">
+                                @if ($connection->provider->value === 'duffel')
+                                    @if (! empty($connection->credentials['access_token'] ?? null))
                                         <span class="text-success">Access token configured</span>
                                     @else
-                                        <span class="text-danger">Missing token</span>
+                                        <span class="text-danger">Access token missing</span>
                                     @endif
                                 @else
-                                    <span class="text-secondary">Configured</span>
+                                    <span class="text-secondary">See edit screen</span>
                                 @endif
-                            </td>
-                            <td>
-                                @if($connection->provider->value === 'duffel')
-                                    {{ $connection->credentials['api_version'] ?? 'v2' }}
-                                @else
-                                    —
-                                @endif
-                            </td>
-                            <td>{{ $connection->last_tested_at?->format('Y-m-d H:i') ?? '—' }}</td>
-                            <td>{{ $connection->last_test_status ?? '—' }}</td>
-                            <td>{{ $connection->last_error ?? $connection->latestReadinessDiagnostic?->safe_message ?? '—' }}</td>
-                            <td>{{ $connection->latestSearchDiagnostic?->status === 'success' ? $connection->latestSearchDiagnostic?->created_at?->format('Y-m-d H:i') : '—' }}</td>
-                            <td>{{ $connection->latestOrderDiagnostic?->status === 'success' ? $connection->latestOrderDiagnostic?->created_at?->format('Y-m-d H:i') : '—' }}</td>
-                            <td class="text-end">
-                                <a href="{{ route('admin.api-settings.edit', $connection) }}" class="btn btn-sm btn-outline-primary">Edit</a>
-                                <form method="POST" action="{{ route('admin.api-settings.test', $connection) }}" class="d-inline">
-                                    @csrf
-                                    @method('PATCH')
-                                    <button type="submit" class="btn btn-sm btn-outline-secondary">Run readiness check</button>
-                                </form>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="12" class="text-center text-secondary py-4">
-                                No supplier rows yet. Add your supplier connections to start searching live fares.
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-        <div class="card-footer">{{ $connections->links() }}</div>
+                            </dd>
+                            @if ($connection->provider->value === 'duffel')
+                                <dt class="col-6 text-secondary">API version</dt>
+                                <dd class="col-6 mb-1 text-end">{{ $connection->credentials['api_version'] ?? 'v2' }}</dd>
+                            @endif
+                            <dt class="col-6 text-secondary">Last readiness</dt>
+                            <dd class="col-6 mb-1 text-end">{{ $connection->last_tested_at?->format('Y-m-d H:i') ?? '—' }}</dd>
+                            <dt class="col-6 text-secondary">Last readiness status</dt>
+                            <dd class="col-6 mb-1 text-end">{{ $connection->last_test_status ?? '—' }}</dd>
+                            <dt class="col-6 text-secondary">Last search</dt>
+                            <dd class="col-6 mb-1 text-end">{{ $connection->latestSearchDiagnostic?->status === 'success' ? $connection->latestSearchDiagnostic?->created_at?->format('Y-m-d H:i') : '—' }}</dd>
+                            <dt class="col-6 text-secondary">Last order</dt>
+                            <dd class="col-6 mb-1 text-end">{{ $connection->latestOrderDiagnostic?->status === 'success' ? $connection->latestOrderDiagnostic?->created_at?->format('Y-m-d H:i') : '—' }}</dd>
+                        </dl>
+                        @if ($connection->last_error || filled($connection->latestReadinessDiagnostic?->safe_message))
+                            <details class="mb-3">
+                                <summary class="small cursor-pointer text-secondary">Diagnostics</summary>
+                                <div class="small text-secondary mt-2 mb-0">{{ $connection->last_error ?? $connection->latestReadinessDiagnostic?->safe_message }}</div>
+                            </details>
+                        @endif
+                        <div class="d-flex flex-wrap gap-2 mt-auto pt-2 border-top">
+                            <a href="{{ route('admin.api-settings.edit', $connection) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+                            <form method="POST" action="{{ route('admin.api-settings.test', $connection) }}" class="d-inline">
+                                @csrf
+                                @method('PATCH')
+                                <button type="submit" class="btn btn-sm btn-outline-secondary">Run readiness check</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @empty
+            <div class="col-12">
+                <div class="card"><div class="card-body text-center text-secondary py-4">
+                    No supplier connections yet. Add your supplier connections to start searching fares.
+                </div></div>
+            </div>
+        @endforelse
     </div>
+    @if ($connections->hasPages())
+        <div class="mb-4">{{ $connections->links() }}</div>
+    @endif
 
     @if (! $hasRows)
         <div class="card mt-3">

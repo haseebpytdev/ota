@@ -138,6 +138,8 @@ class DuffelOfferNormalizer
                     'flight_number' => (string) data_get($segment, 'marketing_carrier_flight_number', ''),
                     'airline_code' => strtoupper((string) data_get($segment, 'marketing_carrier.iata_code', '')),
                     'airline_name' => (string) data_get($segment, 'marketing_carrier.name', ''),
+                    'operating_airline_code' => strtoupper((string) data_get($segment, 'operating_carrier.iata_code', '')),
+                    'operating_airline_name' => (string) data_get($segment, 'operating_carrier.name', ''),
                     'duration_minutes' => null,
                     'cabin' => (string) data_get($segment, 'cabin_class', ''),
                 ];

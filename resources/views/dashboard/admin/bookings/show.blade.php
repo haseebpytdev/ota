@@ -23,6 +23,20 @@
     .booking-detail h3 { font-size: 1rem; font-weight: 600; }
     .timeline-entry { border-left: 2px solid var(--tblr-primary, #206bc4); padding-left: 1rem; margin-bottom: 1rem; }
     .audit-row { font-size: .8125rem; border-bottom: 1px dashed rgba(98,105,118,.15); padding: .35rem 0; }
+    @media (max-width: 767px) {
+        .booking-detail .card-body .btn,
+        .booking-detail .card-body .form-select,
+        .booking-detail .card-body .form-control {
+            width: 100%;
+        }
+        .booking-detail .card-body .btn-sm {
+            padding-top: .45rem;
+            padding-bottom: .45rem;
+        }
+        .booking-detail .badge {
+            white-space: normal;
+        }
+    }
 </style>
 @endpush
 
@@ -57,6 +71,26 @@
         </div>
     @endif
 
+    @php
+        $pipelineBooking = str_replace('_', ' ', $booking->status->value);
+        $pipelinePayment = str_replace('_', ' ', (string) ($booking->payment_status ?? 'unpaid'));
+        $pipelineSupplier = str_replace('_', ' ', (string) ($booking->supplier_booking_status ?? 'not started'));
+        $pipelineTicket = str_replace('_', ' ', (string) ($booking->ticketing_status ?? 'not started'));
+    @endphp
+    <div class="card mb-3 ota-admin-booking-pipeline" data-booking-pipeline-bar>
+        <div class="card-body py-3">
+            <div class="d-flex flex-wrap align-items-center gap-3 justify-content-between">
+                <div class="fw-semibold text-secondary small text-uppercase mb-0">Booking status</div>
+                <div class="d-flex flex-wrap gap-2 justify-content-end">
+                    <span class="badge bg-blue-lt text-blue">Booking · {{ $pipelineBooking }}</span>
+                    <span class="badge bg-azure-lt text-azure">Payment · {{ $pipelinePayment }}</span>
+                    <span class="badge bg-purple-lt text-purple">Supplier · {{ $pipelineSupplier }}</span>
+                    <span class="badge bg-teal-lt text-teal">Ticketing · {{ $pipelineTicket }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="row g-4 booking-detail">
         <div class="col-lg-8">
             <div class="card mb-3">
@@ -71,7 +105,44 @@
                 <div class="card-header"><h3 class="card-title mb-0">Passengers &amp; contact</h3></div>
                 <div class="card-body">
                     @foreach ($booking->passengers as $pax)
-                        <p class="mb-1 fw-semibold">{{ trim(($pax->title.' '.$pax->first_name.' '.$pax->last_name)) }}</p>
+                        <div class="mb-3 pb-3 border-bottom border-secondary-subtle">
+                            <p class="mb-1 fw-semibold">{{ trim(($pax->title.' '.$pax->first_name.' '.$pax->last_name)) }}</p>
+                            <div class="small text-secondary">
+                                @if ($pax->date_of_birth)
+                                    <div>DOB: {{ $pax->date_of_birth->format('Y-m-d') }}</div>
+                                @endif
+                                @if ($pax->gender)
+                                    <div>Gender: {{ $pax->gender }}</div>
+                                @endif
+                                @if ($pax->nationality)
+                                    <div>Nationality: {{ strtoupper($pax->nationality) }}</div>
+                                @endif
+                                @if ($pax->document_type)
+                                    <div>Document type: {{ str_replace('_', ' ', $pax->document_type) }}</div>
+                                @endif
+                                @if ($pax->passport_number)
+                                    <div>Passport: {{ $pax->passport_number }}</div>
+                                @endif
+                                @if ($pax->passport_issuing_country)
+                                    <div>Passport issuing country: {{ strtoupper($pax->passport_issuing_country) }}</div>
+                                @endif
+                                @if ($pax->passport_expiry_date)
+                                    <div>Passport expiry: {{ $pax->passport_expiry_date->format('Y-m-d') }}</div>
+                                @endif
+                                @if ($pax->passport_issue_date)
+                                    <div>Passport issued: {{ $pax->passport_issue_date->format('Y-m-d') }}</div>
+                                @endif
+                                @if ($pax->national_id_number)
+                                    <div>National ID: {{ $pax->national_id_number }}</div>
+                                @endif
+                                @if ($pax->country_of_residence)
+                                    <div>Country of residence: {{ $pax->country_of_residence }}</div>
+                                @endif
+                                @if ($pax->place_of_birth)
+                                    <div>Place of birth: {{ $pax->place_of_birth }}</div>
+                                @endif
+                            </div>
+                        </div>
                     @endforeach
                     @if($booking->contact)
                         <ul class="list-unstyled small text-secondary mb-0 mt-2">

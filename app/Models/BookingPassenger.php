@@ -16,7 +16,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'last_name',
     'date_of_birth',
     'nationality',
+    'gender',
     'passport_number',
+    'passport_issuing_country',
+    'passport_expiry_date',
+    'passport_issue_date',
+    'document_type',
+    'national_id_number',
+    'country_of_residence',
+    'place_of_birth',
     'meta',
 ])]
 class BookingPassenger extends Model
@@ -28,6 +36,8 @@ class BookingPassenger extends Model
     {
         return [
             'date_of_birth' => 'date',
+            'passport_expiry_date' => 'date',
+            'passport_issue_date' => 'date',
             'meta' => 'array',
         ];
     }
