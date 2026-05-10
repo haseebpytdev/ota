@@ -1,0 +1,16 @@
+@extends('layouts.dashboard')
+
+@section('title', 'Create Supplier Connection')
+
+@section('page-header')
+    <div class="row g-2 align-items-center">
+        <div class="col">
+            <div class="page-pretitle">Integrations</div>
+            <h1 class="page-title">Create supplier connection</h1>
+        </div>
+    </div>
+@endsection
+
+@section('content')
+    @include('dashboard.admin.api-settings.form')
+@endsection
